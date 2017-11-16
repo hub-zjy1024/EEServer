@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre1.8.0_121">
+		<attributes>
+			<attribute name="owner.project.facets" value="java"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v8.5">
+		<attributes>
+			<attribute name="owner.project.facets" value="jst.web"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="lib" path="PDFRenderer-0.9.1.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/fontbox-2.0.6.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/pdfbox-2.0.6.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/levigo-jbig2-imageio-2.0.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/zxing.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/javase-2.1.jar"/>
+	<classpathentry kind="lib" path="itextpdf-5.5.3.jar"/>
+	<classpathentry kind="lib" path="itext-asian-5.2.0.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/commons-net-3.6.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/gson-2.5.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/json-20170516.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/ksoap2-android-assembly-2.6.0-jar-with-dependencies.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/commons-codec-1.10.jar"/>
+	<classpathentry kind="output" path="build/classes"/>
+</classpath>

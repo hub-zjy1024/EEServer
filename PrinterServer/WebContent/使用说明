@@ -1,0 +1,36 @@
+注：
+jacob进行操作的文件路径上的文件夹名字中不能有空格
+必要的配置
+WebContent/jacobDll中的dll文件，64和86分别对应64位和32位系统，选择正确的放入jdk安装目录jdk/jre/bin里面 
+jar包在项目根目录下面jacob.jar,dll和jar文件是匹配的，最好版本不要随意搭配。本项目的jar是放在Tomcat安装目录的lib下的
+jar包放入Tomcat安装目录的lib下，不需要再次导入jar包，或者直接放在项目web-inf/lib下面，需手动导入jar包
+
+如果出现异常
+Can't map name to dispid
+需要在组件管理器中配置com端口
+开始-->运行-->输入dcomcnfg -32或者comexp.msc -32
+依次进入组件服务-->计算机-->我的电脑-->DCOM配置
+如果只有装有wps
+找到WPS文字 文档
+如果只有Microsoft Office Word
+找到Microsoft Office Word 97 - 2003 文档
+如果都装了，测试一下程序，会在任务管理器里面多一个进程，wps.exe或者WINWORD.exe分别代表wps程序，和word程序
+如果找不到，运行dcomcnfg，重复上面步骤
+右键选择属性，将 “身份标识” 选项卡中的用户设为 “交互式用户” 。
+然后重启TOMCAT！！！！
+
+如果需要导出PDF，请确认当前jacob调用的word程序是否具有另存为/导出为pdf的选项。
+打开一个word文档，另存为/导出为选项中是否有PDF格式
+如果有，才能进行导出，否则，请安装WebContent/jacobDll/SaveAsPDFandXPS.exe
+
+问题1：
+word VariantChangeType failed
+解决办法：
+32位创建：C:\Windows\System32\config\systemprofile\Desktop
+64位创建：C:\Windows\SysWOW64\config\systemprofile\Desktop
+如果还是不行，就俩文件夹一起创建
+使用cmd命令:
+md C:\Windows\SysWOW64\config\systemprofile\Desktop
+md C:\Windows\System32\config\systemprofile\Desktop
+
+然后重启TOMCAT！！！！
