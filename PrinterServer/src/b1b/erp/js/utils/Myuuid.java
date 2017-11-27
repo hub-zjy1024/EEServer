@@ -1,6 +1,5 @@
 package b1b.erp.js.utils;
 
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 public class Myuuid {
 	public static String create(int lastLen){

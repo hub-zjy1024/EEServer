@@ -1,42 +1,23 @@
 package b1b.erp.js.servlet;
 
-import java.awt.print.Book;
-import java.awt.print.PageFormat;
-import java.awt.print.Paper;
-import java.awt.print.PrinterException;
-import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 
-import javax.print.PrintService;
-import javax.print.PrintServiceLookup;
-import javax.print.attribute.standard.PrinterName;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
-import com.google.zxing.client.j2se.MatrixToImageConfig;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.google.zxing.common.BitMatrix;
 import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.ComThread;
 import com.jacob.com.Dispatch;
 import com.jacob.com.Variant;
-import com.sun.pdfview.PDFFile;
-import com.sun.pdfview.PDFPage;
 
-import b1b.erp.js.MyPDFPrintPage;
 import b1b.erp.js.utils.FileUtils;
 import b1b.erp.js.utils.Myuuid;
 import b1b.erp.js.utils.WordUtils;
@@ -201,9 +182,6 @@ public class PrintServlet extends HttpServlet {
 			// Dispatch.put(template, "Saved", true);
 			// }
 			// Dispatch.call(activeX, "Quit");
-			// System.out.println("close");
-			ComThread.Release();
-			// // ComThread.quitMainSTA();
 			isOK = true;
 			// response.getWriter().append("1").close();
 		} catch (FileNotFoundException e) {
@@ -262,25 +240,20 @@ public class PrintServlet extends HttpServlet {
 			Dispatch.call(excel, "save");
 		}
 		activeX.invoke("Quit", new Variant[] {});
-		ComThread.Release();
 		return true;
 	}
 
 	public boolean printWord(String filePath, String printerName) throws Exception {
 		try {
-			ComThread.InitSTA(true);
-			ActiveXComponent ac = new ActiveXComponent("Word.Application");
+			ActiveXComponent ac = WordUtils.getApp();
 			ac.setProperty("Visible", new Variant(true));
 			Dispatch doc = WordUtils.openDocument(filePath, ac);
 			System.out.println("startPrint");
 			WordUtils.print(doc, printerName, ac);
 			WordUtils.exit(ac);
-			// WordUtils.print(doc,"Microsoft XPS Document Writer", ac);
 		} catch (Exception e) {
 			throw e;
 		} finally {
-			ComThread.Release();
-			// utils.exit();
 		}
 		return true;
 	}

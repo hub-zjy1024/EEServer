@@ -32,8 +32,6 @@ import com.jacob.com.ComThread;
 import com.jacob.com.Dispatch;
 import com.jacob.com.Variant;
 
-import b1b.erp.js.DownUtils;
-
 /**
  * @author js 使用该工具类需要用到 jacob.jar 包及 jacob-1.18-M2-x86.dll/
  *         jacob-1.18-M2-x64.dll文件 .dll文件复制到服务端 %java_home%/bin下 32位系统使用
@@ -598,16 +596,39 @@ public class WordUtils { // word运行程序对象
 			String nowPrinter = ac.getProperty("ActivePrinter").toString();
 			if(!printerName.equals(nowPrinter)){
 				try{
-					System.out.println(DownUtils.getTimeAtSS()+":start set printer:"+printerName);
+					System.out.println(UploadUtils.getCurrentAtSS()+":start set printer:"+printerName);
 					ac.setProperty("ActivePrinter", new Variant(printerName));
 				}catch (Exception e) {
-					System.out.println(DownUtils.getTimeAtSS()+":set printer fail:" + e.getMessage());
+					System.out.println(UploadUtils.getCurrentAtSS()+":set printer fail:" + e.getMessage());
 				}
 			}
 		}
 		Dispatch.call(doc, "PrintOut");
 	}
-
+	/**
+	 * 打印
+	 * 
+	 * @param doc
+	 *            待打印的文档对象
+	 * @param printerName
+	 *            打印机名称无效时不改变默认打印机
+	 * @param ac
+	 *            Word主程序
+	 */
+	public  static void print2(Dispatch doc, String printerName, ActiveXComponent ac) {
+		if (printerName != null&&!printerName.equals("")) {
+			String nowPrinter = ac.getProperty("ActivePrinter").toString();
+			if(!printerName.equals(nowPrinter)){
+				try{
+					System.out.println(UploadUtils.getCurrentAtSS()+":start set printer:"+printerName);
+					ac.setProperty("ActivePrinter", new Variant(printerName));
+				}catch (Exception e) {
+					System.out.println(UploadUtils.getCurrentAtSS()+":set printer fail:" + e.getMessage());
+				}
+			}
+		}
+		Dispatch.call(doc, "PrintOut");
+	}
 	/**
 	 * 打印
 	 */
@@ -1319,6 +1340,8 @@ public class WordUtils { // word运行程序对象
 					value = e.getValue();
 				}
 				Dispatch.put(bookMark, "Text", value);
+			}else{
+				System.out.println("bookmark not found:"+e.getKey());
 			}
 		}
 	}

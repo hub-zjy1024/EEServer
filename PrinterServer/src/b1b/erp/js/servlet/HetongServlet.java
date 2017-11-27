@@ -1,23 +1,16 @@
 package b1b.erp.js.servlet;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -27,21 +20,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.ksoap2.SoapEnvelope;
-import org.ksoap2.serialization.SoapObject;
-import org.ksoap2.serialization.SoapPrimitive;
-import org.xmlpull.v1.XmlPullParserException;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.google.zxing.common.BitMatrix;
 import com.itextpdf.text.DocumentException;
 import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.ComThread;
@@ -49,14 +32,11 @@ import com.jacob.com.Dispatch;
 import com.jacob.com.Variant;
 
 import b1b.erp.js.Code128CCreator;
-import b1b.erp.js.ItextTest;
 import b1b.erp.js.entity.GoodInfo;
-import b1b.erp.js.utils.DownUtils;
 import b1b.erp.js.utils.FileUtils;
 import b1b.erp.js.utils.Md5Utils;
 import b1b.erp.js.utils.Myuuid;
 import b1b.erp.js.utils.UploadUtils;
-import b1b.erp.js.utils.WebserviceUtils;
 import b1b.erp.js.utils.WordUtils;
 
 /**
@@ -246,8 +226,7 @@ public class HetongServlet extends HttpServlet {
 		String waterPdf = hetongDir.getAbsolutePath() + "\\" + htPatten + "_w.pdf";
 		FileOutputStream fio = new FileOutputStream(waterPdf);
 		FileInputStream upIn=null;
-		try {
-			ItextTest.setWatermark(fio, pdfPath, "北方科讯电子科技有限公司" + hetongID, true);
+//			ItextTest.setWatermark(fio, pdfPath, "北方科讯电子科技有限公司" + hetongID, true);
 			fio.close();
 			String ftpAddres = "172.16.6.22";
 			upIn = new FileInputStream(waterPdf);
@@ -299,7 +278,6 @@ public class HetongServlet extends HttpServlet {
 			// e.printStackTrace();
 			// }
 			// if (res != null && res.toString().equals("保存成功")) {
-			writer.write("ok:" + waterPdf);
 			// writer.write("\n");
 			// } else {
 			// writer.write("error:插入信息失败");
@@ -307,18 +285,12 @@ public class HetongServlet extends HttpServlet {
 			// } else {
 			// writer.write("error:上传ftp失败");
 			// }
-		} catch (DocumentException e) {
-			e.printStackTrace();
-			writer.write("error:pdf加水印失败");
-
-		}
 		if(upIn!=null){
 			upIn.close();
 		}
 		writer.flush();
 		writer.close();
 		WordUtils.exit(ac);
-		ComThread.Release();
 		/*
 		 * writer.write("生成合同成功"); writer.flush(); writer.close();
 		 * ComThread.InitSTA(); ac.getProperty("Documents");

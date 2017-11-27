@@ -1,8 +1,12 @@
 package b1b.erp.js.servlet;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 
 import javax.servlet.ServletException;
@@ -11,13 +15,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.tomcat.util.http.fileupload.UploadContext;
-import org.eclipse.jdt.internal.compiler.problem.ShouldNotImplement;
-
-import com.itextpdf.text.ImgCCITT;
 import com.jacob.activeX.ActiveXComponent;
+import com.jacob.com.ComThread;
 import com.jacob.com.Dispatch;
-import com.sun.org.apache.bcel.internal.generic.DDIV;
 
 import b1b.erp.js.Code128CCreator;
 import b1b.erp.js.utils.Date2StringUtils;
@@ -54,7 +54,6 @@ public class KyPrintServlet extends HttpServlet {
 		String cardID = request.getParameter("cardID");
 		String destcode = request.getParameter("destcode");
 		String yundanType = request.getParameter("yundanType");
-		String printer = request.getParameter("printer");
 		String tuojiwu = request.getParameter("tuojiwu");
 		String goodinfos = request.getParameter("goodinfos");
 		
@@ -68,7 +67,9 @@ public class KyPrintServlet extends HttpServlet {
 		String notes = request.getParameter("notes");
 		String payType = request.getParameter("payType");
 		String templatePath = request.getServletContext().getRealPath("/docTemplate/ky模板.doc");
+//		String templatePath = request.getServletContext().getRealPath("/docTemplate/ky模板.doc");
 		String homeDir = getServletContext().getInitParameter("dyjDir");
+		String printer = getServletContext().getInitParameter("KY_Printer");
 		String savePath = homeDir + "/KY/"+UploadUtils.getCurrentYearAndMonth()+"/";
 		String imgDir = savePath + "codeImg/";
 		File file = new File(savePath);
@@ -128,7 +129,14 @@ public class KyPrintServlet extends HttpServlet {
 			bMarksAndValue.put("备注" + i, notes);
 			bMarksAndValue.put("托寄物" + i, infoBuilder.toString());
 		}
-		ActiveXComponent ac = SingleActiveXComponent.getApp();
+//		ActiveXComponent ac = SingleActiveXComponent.getApp();
+//		ActiveXComponent ac = new ActiveXComponent("Word.Application");
+//		HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{000209FF-0000-0000-C000-000000000046}
+//		ActiveXComponent ac = new ActiveXComponent("000209FF-0000-0000-C000-000000000046");
+		ComThread.InitMTA(true);
+		ActiveXComponent ac = new ActiveXComponent("Word.Application");
+		ac.setProperty("Visible", true);
+		System.out.println("dispath:"+ac.m_pDispatch);
 		Dispatch doc = WordUtils.openDocument(docFilepath, ac);
 		WordUtils.replaceBookmark(bMarksAndValue, doc);
 		Code128CCreator c = new Code128CCreator();
@@ -147,8 +155,24 @@ public class KyPrintServlet extends HttpServlet {
 		WordUtils.insertImageAtBookmarkByMM("条码1", imagePath, codeWidth, "width", doc);
 		WordUtils.insertImageAtBookmarkByMM("条码2", imagePath, codeWidth, "width", doc);
 		WordUtils.insertImageAtBookmarkByMM("条码3", imagePath, codeWidth, "width", doc);
-		 WordUtils.print(doc, printer, ac);
-		WordUtils.closeDocument(doc, true);
+		try{
+			 WordUtils.print2(doc, printer, ac);
+		}catch (Exception e) {
+			ByteArrayOutputStream bao=new ByteArrayOutputStream();
+			PrintWriter writer=new PrintWriter(bao);
+			e.printStackTrace(writer);
+			writer.flush();
+			System.out.println("error-----"+new String (bao.toByteArray(),"utf-8"));
+			writer.close();
+			WordUtils.closeDocument(doc, true);
+			WordUtils.exit(ac);
+			ComThread.Release();
+			response.getWriter().append("error"+e.getMessage()).close();
+			return;
+		}
+//		WordUtils.closeDocument(doc, true);
+		WordUtils.exit(ac);
+		ComThread.Release();
 		response.getWriter().append("ok").close();;
 	}
 

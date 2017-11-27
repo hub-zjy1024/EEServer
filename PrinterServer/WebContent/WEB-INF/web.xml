@@ -17,7 +17,7 @@
     <param-value>C:/DyjPrinter/</param-value>
   </context-param>
   <context-param>
-    <param-name>printer2</param-name>
-    <param-value>jdjfj</param-value>
+    <param-name>KY_Printer</param-name>
+    <param-value>KY_Printer</param-value>
   </context-param>
 </web-app>

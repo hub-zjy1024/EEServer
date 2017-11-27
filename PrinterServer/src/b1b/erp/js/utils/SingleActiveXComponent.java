@@ -21,8 +21,13 @@ public class SingleActiveXComponent {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if (docs == null) {
-			init();
+		try {
+			if (docs == null) {
+				init();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("New ActiveX Error:"+e.getMessage());
 		}
 		return axc;
 	}
