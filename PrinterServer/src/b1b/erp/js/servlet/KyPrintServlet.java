@@ -67,7 +67,6 @@ public class KyPrintServlet extends HttpServlet {
 		String notes = request.getParameter("notes");
 		String payType = request.getParameter("payType");
 		String templatePath = request.getServletContext().getRealPath("/docTemplate/ky模板.doc");
-//		String templatePath = request.getServletContext().getRealPath("/docTemplate/ky模板.doc");
 		String homeDir = getServletContext().getInitParameter("dyjDir");
 		String printer = getServletContext().getInitParameter("KY_Printer");
 		String savePath = homeDir + "/KY/"+UploadUtils.getCurrentYearAndMonth()+"/";
@@ -80,35 +79,33 @@ public class KyPrintServlet extends HttpServlet {
 		if (!imgDirFile.exists()) {
 			imgDirFile.mkdirs();
 		}
-		String wordName = UploadUtils.getCurrentDay()+"_ky" + Myuuid.create(4) + ".doc";
+		String wordName = UploadUtils.getCurrentDay()+"_"+ orderID+"_"+ Myuuid.createRandom(4) + ".doc";
 		String docFilepath=savePath+wordName;
 		String[] infos;
+		StringBuilder infoBuilder = new StringBuilder();
 		if (goodinfos != null) {
 			infos = goodinfos.split("\\$");
-		} else {
-			infos = new String[] { "test1&1000", "test3&1024", "test2&500", "test" };
-		}
-		StringBuilder infoBuilder = new StringBuilder();
-		for (int i = 0; i < infos.length; i++) {
-			if (i == 3) {
-				if (infos.length > 3) {
-					infoBuilder.append("\t等");
+			for (int i = 0; i < infos.length; i++) {
+				if (i == 3) {
+					if (infos.length > 3) {
+						infoBuilder.append("\t等");
+					}
+					break;
 				}
-				break;
-			}
-			String[] s = infos[i].split("&");
-			if (s.length != 1) {
-				infoBuilder.append(s[0] + " ：" + s[1]);
-				if (i != 2) {
-					infoBuilder.append("\n");
+				String[] s = infos[i].split("&");
+				if (s.length != 1) {
+					infoBuilder.append(s[0] + " ：" + s[1]);
+					if (i != 2) {
+						infoBuilder.append("\n");
+					}
 				}
 			}
 		}
-		
-		System.out.println("===="+UploadUtils.getCurrentAtSS()+"========");
+		System.out.println("KY===="+UploadUtils.getCurrentAtSS()+"========");
 		System.out.println("goodinfo:"+infoBuilder.toString());
 		FileInputStream testInputStream = new FileInputStream(templatePath);
 		FileUtils.fileCopy(testInputStream, docFilepath);
+		testInputStream.close();
 		HashMap<String, String> bMarksAndValue = new HashMap<>();
 		String printTime = Date2StringUtils.style1();
 		bMarksAndValue.put("打印时间", "打印时间：" + printTime);
@@ -129,11 +126,7 @@ public class KyPrintServlet extends HttpServlet {
 			bMarksAndValue.put("备注" + i, notes);
 			bMarksAndValue.put("托寄物" + i, infoBuilder.toString());
 		}
-//		ActiveXComponent ac = SingleActiveXComponent.getApp();
-//		ActiveXComponent ac = new ActiveXComponent("Word.Application");
-//		HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{000209FF-0000-0000-C000-000000000046}
-//		ActiveXComponent ac = new ActiveXComponent("000209FF-0000-0000-C000-000000000046");
-		ComThread.InitMTA(true);
+		ComThread.InitSTA(true);
 		ActiveXComponent ac = new ActiveXComponent("Word.Application");
 		ac.setProperty("Visible", true);
 		System.out.println("dispath:"+ac.m_pDispatch);
@@ -151,7 +144,6 @@ public class KyPrintServlet extends HttpServlet {
 		float h1 = 9;
 		float h2 = 7;
 		float codeWidth=40;
-//		WordUtils.insertImageAtBookmarkByMM("条码1", imagePath, h2, "height", doc);
 		WordUtils.insertImageAtBookmarkByMM("条码1", imagePath, codeWidth, "width", doc);
 		WordUtils.insertImageAtBookmarkByMM("条码2", imagePath, codeWidth, "width", doc);
 		WordUtils.insertImageAtBookmarkByMM("条码3", imagePath, codeWidth, "width", doc);
@@ -164,7 +156,6 @@ public class KyPrintServlet extends HttpServlet {
 			writer.flush();
 			System.out.println("error-----"+new String (bao.toByteArray(),"utf-8"));
 			writer.close();
-			WordUtils.closeDocument(doc, true);
 			WordUtils.exit(ac);
 			ComThread.Release();
 			response.getWriter().append("error"+e.getMessage()).close();

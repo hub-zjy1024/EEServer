@@ -1,5 +1,9 @@
 package b1b.erp.js.utils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+
 import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.Dispatch;
 import com.jacob.com.Variant;
@@ -27,7 +31,17 @@ public class SingleActiveXComponent {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("New ActiveX Error:"+e.getMessage());
+			ByteArrayOutputStream bao=new ByteArrayOutputStream();
+			PrintWriter writer=new PrintWriter(bao);
+			e.printStackTrace(writer);
+			writer.flush();
+			try {
+				System.out.println("initError-----"+new String (bao.toByteArray(),"utf-8"));
+			} catch (UnsupportedEncodingException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			writer.close();
 		}
 		return axc;
 	}

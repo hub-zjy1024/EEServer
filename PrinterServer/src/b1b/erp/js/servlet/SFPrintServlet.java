@@ -1,6 +1,7 @@
 package b1b.erp.js.servlet;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,6 +18,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.smartcardio.CommandAPDU;
 
 import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.ComThread;
@@ -66,7 +68,6 @@ public class SFPrintServlet extends HttpServlet {
 		String destcode = request.getParameter("destcode");
 		String yundanType = request.getParameter("yundanType");
 		String printer = request.getParameter("printer");
-		System.out.println("printer="+printer);
 		String hasE = request.getParameter("hasE");
 		String[] orders = orderID.split(",");
 		if (destcode == null) {
@@ -130,7 +131,7 @@ public class SFPrintServlet extends HttpServlet {
 				}
 			}
 		}
-		System.out.println("=====" + UploadUtils.getCurrentAtSS() + "=====");
+		System.out.println("SF=====" + UploadUtils.getCurrentAtSS() + "=====");
 		System.out.println("builder:" + builder.toString());
 		String wordDir = getServletContext().getInitParameter("dyjDir");
 		rootPath = wordDir;
@@ -145,7 +146,17 @@ public class SFPrintServlet extends HttpServlet {
 			writer.write("error=" + msg);
 			writer.flush();
 			writer.close();
-			System.out.println("error--------"+msg);
+			ByteArrayOutputStream bao=new ByteArrayOutputStream();
+			PrintWriter errorRecorder=new PrintWriter(bao);
+			e.printStackTrace(errorRecorder);
+			errorRecorder.flush();
+			try {
+				System.out.println("error-----"+new String (bao.toByteArray(),"utf-8"));
+			} catch (UnsupportedEncodingException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			errorRecorder.close();
 			return;
 		}
 		writer.write("ok");
@@ -193,8 +204,8 @@ public class SFPrintServlet extends HttpServlet {
 			String wordPath = savePath + name;
 			FileUtils.fileCopy(testInputStream, wordPath);
 			testInputStream.close();
-//			ActiveXComponent ac = SingleActiveXComponent.getApp();
-			ActiveXComponent ac = new ActiveXComponent("Word.Application");
+			ActiveXComponent ac = SingleActiveXComponent.getApp();
+//			ActiveXComponent ac = new ActiveXComponent("Word.Application");
 			ac.setProperty("Visible", true);
 			Dispatch doc = WordUtils.openDocument(wordPath, ac);
 			HashMap<String, String> bMarksAndValue = new HashMap<>();
@@ -257,16 +268,12 @@ public class SFPrintServlet extends HttpServlet {
 				WordUtils.insertImageAtBookmarkByMM("子条码2", childImgPath, childWidth, "width", doc);
 			}
 			WordUtils.insertImageAtBookmarkByMM("主条码", childImgPath, childWidth, "width", doc);
-			Dispatch docs = ac.getProperty("Documents").getDispatch();
-			WordUtils.save(docs);
+			System.out.println("getPrinter="+printer);
 			String nowPrinter = ac.getProperty("ActivePrinter").toString();
 			System.out.println("nowPrinter:" + nowPrinter);
-//			WordUtils.print(doc, printer, ac);
 			WordUtils.print2(doc, printer, ac);
 			WordUtils.closeDocument(doc, true);
-			WordUtils.exit(ac);
 		}
-
 	}
 
 	/**
