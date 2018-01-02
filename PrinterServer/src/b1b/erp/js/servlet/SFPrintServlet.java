@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.smartcardio.CommandAPDU;
+import javax.swing.JComboBox;
 
 import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.ComThread;
@@ -69,6 +70,18 @@ public class SFPrintServlet extends HttpServlet {
 		String yundanType = request.getParameter("yundanType");
 		String printer = request.getParameter("printer");
 		String hasE = request.getParameter("hasE");
+		String jCompany = request.getParameter("j_company");
+		String dCompany = request.getParameter("d_company");
+		String pid = request.getParameter("pid");
+		if(jCompany==null){
+			jCompany="";
+		}
+		if(dCompany==null){
+			dCompany="";
+		}
+		if(pid==null){
+			pid="";
+		}
 		String[] orders = orderID.split(",");
 		if (destcode == null) {
 			destcode = "1024";
@@ -83,7 +96,6 @@ public class SFPrintServlet extends HttpServlet {
 		} else {
 			price = "";
 		}
-		// String payType = request.getParameter("payType");
 		String serverType = request.getParameter("serverType");
 		String jName = request.getParameter("j_name");
 		String jPhone = request.getParameter("j_phone");
@@ -91,6 +103,7 @@ public class SFPrintServlet extends HttpServlet {
 		String dName = request.getParameter("d_name");
 		String dPhone = request.getParameter("d_phone");
 		String dAddress = request.getParameter("d_address");
+
 		if (jName == null) {
 			jName = "管理员1";
 		}
@@ -135,23 +148,25 @@ public class SFPrintServlet extends HttpServlet {
 		System.out.println("builder:" + builder.toString());
 		String wordDir = getServletContext().getInitParameter("dyjDir");
 		rootPath = wordDir;
+		System.out.println("currentCompany:"+dCompany);
 		PrintWriter writer = response.getWriter();
 		try {
 			for (int i = 0; i < orders.length; i++) {
-				printYunDan(i, orders, response, price, cardID, destcode, yundanType, printer, payType, payPerson,
-						serverType, jName, jPhone, jAddress, dName, dPhone, dAddress, builder, hasE, request);
+				printYunDan(i, orders, response, price, cardID, destcode, yundanType, printer,
+						payType, payPerson, serverType, jName, jPhone, jAddress, dName, dPhone,
+						dAddress, builder, hasE, jCompany, dCompany, request);
 			}
 		} catch (Exception e) {
 			String msg = e.getMessage();
 			writer.write("error=" + msg);
 			writer.flush();
 			writer.close();
-			ByteArrayOutputStream bao=new ByteArrayOutputStream();
-			PrintWriter errorRecorder=new PrintWriter(bao);
+			ByteArrayOutputStream bao = new ByteArrayOutputStream();
+			PrintWriter errorRecorder = new PrintWriter(bao);
 			e.printStackTrace(errorRecorder);
 			errorRecorder.flush();
 			try {
-				System.out.println("error-----"+new String (bao.toByteArray(),"utf-8"));
+				System.out.println("error-----" + new String(bao.toByteArray(), "utf-8"));
 			} catch (UnsupportedEncodingException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -171,10 +186,11 @@ public class SFPrintServlet extends HttpServlet {
 
 	}
 
-	private void printYunDan(int index, String[] orders, HttpServletResponse response, String price, String cardID,
-			String destcode, String yundanType, String printer, String payType, String payPerson, String serverType,
-			String jName, String jPhone, String jAddress, String dName, String dPhone, String dAddress,
-			StringBuilder builder, String hasE, HttpServletRequest request)
+	private void printYunDan(int index, String[] orders, HttpServletResponse response, String price,
+			String cardID, String destcode, String yundanType, String printer, String payType,
+			String payPerson, String serverType, String jName, String jPhone, String jAddress,
+			String dName, String dPhone, String dAddress, StringBuilder builder, String hasE,
+			String jC, String dC, HttpServletRequest request)
 			throws IOException, FileNotFoundException, UnsupportedEncodingException {
 		String templatePath = request.getServletContext().getRealPath("/docTemplate/sf210模板.doc");
 		String mainOrder = orders[0];
@@ -200,12 +216,13 @@ public class SFPrintServlet extends HttpServlet {
 			if (!imgDir.exists()) {
 				imgDir.mkdirs();
 			}
-			String name = UploadUtils.getCurrentDay() + "_" + Myuuid.create(4) + ".doc";
+			String name = UploadUtils.getCurrentDay() + "_" + mainOrder+ "_" +Myuuid.createRandom(4)
+					+ ".doc";
 			String wordPath = savePath + name;
 			FileUtils.fileCopy(testInputStream, wordPath);
 			testInputStream.close();
 			ActiveXComponent ac = SingleActiveXComponent.getApp();
-//			ActiveXComponent ac = new ActiveXComponent("Word.Application");
+			// ActiveXComponent ac = new ActiveXComponent("Word.Application");
 			ac.setProperty("Visible", true);
 			Dispatch doc = WordUtils.openDocument(wordPath, ac);
 			HashMap<String, String> bMarksAndValue = new HashMap<>();
@@ -229,7 +246,7 @@ public class SFPrintServlet extends HttpServlet {
 			bMarksAndValue.put("声明价格", price);
 
 			bMarksAndValue.put("收件人", dName);
-			bMarksAndValue.put("收件人电话", dPhone);
+			bMarksAndValue.put("收件人电话", dPhone + " " + dC);
 			bMarksAndValue.put("收件地址", dAddress);
 
 			bMarksAndValue.put("寄件人", jName);
@@ -241,7 +258,7 @@ public class SFPrintServlet extends HttpServlet {
 			bMarksAndValue.put("托寄物", builder.toString());
 			bMarksAndValue.put("子单号1", cOrder);
 			bMarksAndValue.put("收件人1", dName);
-			bMarksAndValue.put("收件人1电话", dPhone);
+			bMarksAndValue.put("收件人1电话", dPhone + " " + dC);
 			bMarksAndValue.put("收件人1地址", dAddress);
 			bMarksAndValue.put("寄件人1", jName);
 			bMarksAndValue.put("寄件人1电话", jPhone);
@@ -250,7 +267,7 @@ public class SFPrintServlet extends HttpServlet {
 			if (yundanType.equals("210")) {
 				bMarksAndValue.put("子单号2", cOrder);
 				bMarksAndValue.put("收件人2", dName);
-				bMarksAndValue.put("收件人2电话", dPhone);
+				bMarksAndValue.put("收件人2电话", dPhone + " " + dC);
 				bMarksAndValue.put("收件人2地址", dAddress);
 				bMarksAndValue.put("寄件人2", jName);
 				bMarksAndValue.put("寄件人2电话", jPhone);
@@ -268,7 +285,7 @@ public class SFPrintServlet extends HttpServlet {
 				WordUtils.insertImageAtBookmarkByMM("子条码2", childImgPath, childWidth, "width", doc);
 			}
 			WordUtils.insertImageAtBookmarkByMM("主条码", childImgPath, childWidth, "width", doc);
-			System.out.println("getPrinter="+printer);
+			System.out.println("getPrinter=" + printer);
 			String nowPrinter = ac.getProperty("ActivePrinter").toString();
 			System.out.println("nowPrinter:" + nowPrinter);
 			WordUtils.print2(doc, printer, ac);
@@ -311,6 +328,14 @@ public class SFPrintServlet extends HttpServlet {
 		String dName = map.get("d_name");
 		String dPhone = map.get("d_phone");
 		String dAddress = map.get("d_address");
+		String jCompany = map.get("j_company");
+		String dCompany = map.get("d_company");
+		if(jCompany==null){
+			jCompany="";
+		}
+		if(dCompany==null){
+			dCompany="";
+		}
 		// 寄方，到方，第三方
 		String payType = map.get("payType");
 		String payPerson = map.get("payPerson");
@@ -378,8 +403,9 @@ public class SFPrintServlet extends HttpServlet {
 		// ComThread.InitMTA(true);
 		PrintWriter writer = response.getWriter();
 		for (int i = 0; i < orders.length; i++) {
-			printYunDan(i, orders, response, price, cardID, destcode, yundanType, printer, payType, payPerson,
-					serverType, jName, jPhone, jAddress, dName, dPhone, dAddress, builder, hasE, request);
+			printYunDan(i, orders, response, price, cardID, destcode, yundanType, printer, payType,
+					payPerson, serverType, jName, jPhone, jAddress, dName, dPhone, dAddress,
+					builder, hasE, jCompany, dCompany, request);
 		}
 		writer.write("ok");
 		writer.flush();

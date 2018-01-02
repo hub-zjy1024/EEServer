@@ -3,10 +3,8 @@ package b1b.erp.js.servlet;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.HashMap;
 
 import javax.servlet.ServletException;
@@ -23,7 +21,6 @@ import b1b.erp.js.Code128CCreator;
 import b1b.erp.js.utils.Date2StringUtils;
 import b1b.erp.js.utils.FileUtils;
 import b1b.erp.js.utils.Myuuid;
-import b1b.erp.js.utils.SingleActiveXComponent;
 import b1b.erp.js.utils.UploadUtils;
 import b1b.erp.js.utils.WordUtils;
 
@@ -66,6 +63,18 @@ public class KyPrintServlet extends HttpServlet {
 		String dAddress = request.getParameter("d_address");
 		String notes = request.getParameter("notes");
 		String payType = request.getParameter("payType");
+		String jCompany = request.getParameter("j_company");
+		String dCompany = request.getParameter("d_company");
+		String pid = request.getParameter("pid");
+		if(jCompany==null){
+			jCompany="";
+		}
+		if(dCompany==null){
+			dCompany="";
+		}
+		if(pid==null){
+			pid="";
+		}
 		String templatePath = request.getServletContext().getRealPath("/docTemplate/ky模板.doc");
 		String homeDir = getServletContext().getInitParameter("dyjDir");
 		String printer = getServletContext().getInitParameter("KY_Printer");
@@ -113,10 +122,10 @@ public class KyPrintServlet extends HttpServlet {
 		for (int i = 1; i <= 3; i++) {
 			bMarksAndValue.put("时效类型" + i, yundanType);
 			bMarksAndValue.put("条码号" + i, orderID);
-			bMarksAndValue.put("寄件人" + i, jName);
+			bMarksAndValue.put("寄件人" + i, jCompany+"  "+jName);
 			bMarksAndValue.put("寄件人" + i + "电话", jPhone);
 			bMarksAndValue.put("寄件人" + i + "地址", jAddress);
-			bMarksAndValue.put("收件人" + i, dName);
+			bMarksAndValue.put("收件人" + i,dCompany+"\n"+ dName);
 			bMarksAndValue.put("收件人" + i + "电话", dPhone);
 			bMarksAndValue.put("收件人" + i + "地址", dAddress);
 			bMarksAndValue.put("托寄物" + i, tuojiwu);
