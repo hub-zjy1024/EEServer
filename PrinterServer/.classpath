@@ -13,13 +13,5 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
-	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/zxing.jar"/>
-	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/commons-net-3.6.jar"/>
-	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/gson-2.5.jar"/>
-	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/json-20170516.jar"/>
-	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/ksoap2-android-assembly-2.6.0-jar-with-dependencies.jar"/>
-	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/itext-asian-5.2.0.jar"/>
-	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/itextpdf-5.5.3.jar"/>
-	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/javase-2.1.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

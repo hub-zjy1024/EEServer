@@ -23,7 +23,7 @@ public class SingleActiveXComponent {
 		try {
 			docs = axc.getProperty("Documents").toDispatch();
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("lastwindow is Closed:"+e.getMessage());
 		}
 		try {
 			if (docs == null) {
@@ -31,14 +31,13 @@ public class SingleActiveXComponent {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			ByteArrayOutputStream bao=new ByteArrayOutputStream();
-			PrintWriter writer=new PrintWriter(bao);
+			ByteArrayOutputStream bao = new ByteArrayOutputStream();
+			PrintWriter writer = new PrintWriter(bao);
 			e.printStackTrace(writer);
 			writer.flush();
 			try {
-				System.out.println("initError-----"+new String (bao.toByteArray(),"utf-8"));
+				System.out.println("initError-----" + new String(bao.toByteArray(), "utf-8"));
 			} catch (UnsupportedEncodingException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			writer.close();

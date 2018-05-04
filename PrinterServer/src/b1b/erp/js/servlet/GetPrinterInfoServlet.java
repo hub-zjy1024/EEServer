@@ -2,6 +2,8 @@ package b1b.erp.js.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URL;
+import java.util.Enumeration;
 
 import javax.print.DocFlavor;
 import javax.print.PrintService;
@@ -62,7 +64,7 @@ public class GetPrinterInfoServlet extends HttpServlet {
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		// doGet(request, response);
-		
+
 	}
 
 }

@@ -1,28 +1,30 @@
 package b1b.erp.js.servlet;
 
-import java.io.ByteArrayOutputStream;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.jacob.activeX.ActiveXComponent;
-import com.jacob.com.ComThread;
-import com.jacob.com.Dispatch;
+import com.zjy.print.DocxManager;
+import com.zjy.print.docx.DocxPrinter;
+import com.zjy.print.docx.office.OfficeException;
 
 import b1b.erp.js.Code128CCreator;
-import b1b.erp.js.utils.Date2StringUtils;
 import b1b.erp.js.utils.FileUtils;
 import b1b.erp.js.utils.Myuuid;
 import b1b.erp.js.utils.UploadUtils;
-import b1b.erp.js.utils.WordUtils;
 
 /**
  * Servlet implementation class KyPrintServlet
@@ -53,7 +55,6 @@ public class KyPrintServlet extends HttpServlet {
 		String yundanType = request.getParameter("yundanType");
 		String tuojiwu = request.getParameter("tuojiwu");
 		String goodinfos = request.getParameter("goodinfos");
-		
 		String counts = request.getParameter("counts");
 		String jName = request.getParameter("j_name");
 		String jPhone = request.getParameter("j_phone");
@@ -66,32 +67,17 @@ public class KyPrintServlet extends HttpServlet {
 		String jCompany = request.getParameter("j_company");
 		String dCompany = request.getParameter("d_company");
 		String pid = request.getParameter("pid");
-		if(jCompany==null){
-			jCompany="";
+		if (jCompany == null) {
+			jCompany = "";
 		}
-		if(dCompany==null){
-			dCompany="";
+		if (dCompany == null) {
+			dCompany = "";
 		}
-		if(pid==null){
-			pid="";
+		if (pid == null) {
+			pid = "";
 		}
-		String templatePath = request.getServletContext().getRealPath("/docTemplate/ky模板.doc");
-		String homeDir = getServletContext().getInitParameter("dyjDir");
-		String printer = getServletContext().getInitParameter("KY_Printer");
-		String savePath = homeDir + "/KY/"+UploadUtils.getCurrentYearAndMonth()+"/";
-		String imgDir = savePath + "codeImg/";
-		File file = new File(savePath);
-		if (!file.exists()) {
-			file.mkdirs();
-		}
-		File imgDirFile = new File(imgDir);
-		if (!imgDirFile.exists()) {
-			imgDirFile.mkdirs();
-		}
-		String wordName = UploadUtils.getCurrentDay()+"_"+ orderID+"_"+ Myuuid.createRandom(4) + ".doc";
-		String docFilepath=savePath+wordName;
-		String[] infos;
 		StringBuilder infoBuilder = new StringBuilder();
+		String infos[];
 		if (goodinfos != null) {
 			infos = goodinfos.split("\\$");
 			for (int i = 0; i < infos.length; i++) {
@@ -110,70 +96,93 @@ public class KyPrintServlet extends HttpServlet {
 				}
 			}
 		}
-		System.out.println("KY===="+UploadUtils.getCurrentAtSS()+"========");
-		System.out.println("goodinfo:"+infoBuilder.toString());
-		FileInputStream testInputStream = new FileInputStream(templatePath);
-		FileUtils.fileCopy(testInputStream, docFilepath);
-		testInputStream.close();
-		HashMap<String, String> bMarksAndValue = new HashMap<>();
-		String printTime = Date2StringUtils.style1();
-		bMarksAndValue.put("打印时间", "打印时间：" + printTime);
-		bMarksAndValue.put("目的地区号", destcode);
-		for (int i = 1; i <= 3; i++) {
-			bMarksAndValue.put("时效类型" + i, yundanType);
-			bMarksAndValue.put("条码号" + i, orderID);
-			bMarksAndValue.put("寄件人" + i, jCompany+"  "+jName);
-			bMarksAndValue.put("寄件人" + i + "电话", jPhone);
-			bMarksAndValue.put("寄件人" + i + "地址", jAddress);
-			bMarksAndValue.put("收件人" + i,dCompany+"\n"+ dName);
-			bMarksAndValue.put("收件人" + i + "电话", dPhone);
-			bMarksAndValue.put("收件人" + i + "地址", dAddress);
-			bMarksAndValue.put("托寄物" + i, tuojiwu);
-			bMarksAndValue.put("件数" + i, counts);
-			bMarksAndValue.put("付款方式" + i,payType );
-			bMarksAndValue.put("月结卡号" + i, cardID);
-			bMarksAndValue.put("备注" + i, notes);
-			bMarksAndValue.put("托寄物" + i, infoBuilder.toString());
+		String wordDir = getServletContext().getInitParameter("dyjDir");
+		String printer = getServletContext().getInitParameter("KY_Printer");
+		String templatePath = request.getServletContext().getRealPath("/docTemplate/kyDocx.docx");
+		String officeHome = getServletContext().getInitParameter("openoffice_home");
+		String savePath = wordDir + "KY/" + UploadUtils.getCurrentYearAndMonth() + "/";
+		String newWord = savePath + UploadUtils.getCurrentDay() + "o_" + pid + "_" + orderID + "_"
+				+ Myuuid.createRandom(4) + ".docx";
+		String imgDir = savePath + "codeImg/";
+		File imgdir = new File(imgDir);
+		if (!imgdir.exists()) {
+			imgdir.mkdirs();
 		}
-		ComThread.InitSTA(true);
-		ActiveXComponent ac = new ActiveXComponent("Word.Application");
-		ac.setProperty("Visible", true);
-		System.out.println("dispath:"+ac.m_pDispatch);
-		Dispatch doc = WordUtils.openDocument(docFilepath, ac);
-		WordUtils.replaceBookmark(bMarksAndValue, doc);
+		File desfFile = new File(newWord);
 		Code128CCreator c = new Code128CCreator();
 		String barCode;
-		String imagePath = imgDir+wordName+".png";
+		String imagePath = imgDir + desfFile.getName() + ".png";
+		String type = imagePath.substring(imagePath.lastIndexOf(".") + 1, imagePath.length());
 		try {
 			barCode = c.getCodeA(orderID, 1);
 			c.kiCode128C(barCode, 2, 66, imagePath);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		float h1 = 9;
-		float h2 = 7;
-		float codeWidth=40;
-		WordUtils.insertImageAtBookmarkByMM("条码1", imagePath, codeWidth, "width", doc);
-		WordUtils.insertImageAtBookmarkByMM("条码2", imagePath, codeWidth, "width", doc);
-		WordUtils.insertImageAtBookmarkByMM("条码3", imagePath, codeWidth, "width", doc);
-		try{
-			 WordUtils.print2(doc, printer, ac);
-		}catch (Exception e) {
-			ByteArrayOutputStream bao=new ByteArrayOutputStream();
-			PrintWriter writer=new PrintWriter(bao);
-			e.printStackTrace(writer);
-			writer.flush();
-			System.out.println("error-----"+new String (bao.toByteArray(),"utf-8"));
-			writer.close();
-			WordUtils.exit(ac);
-			ComThread.Release();
-			response.getWriter().append("error"+e.getMessage()).close();
-			return;
+		try {
+			Map<String, Object> param = new HashMap<String, Object>();
+			Map<String, Object> header = new HashMap<String, Object>();
+			float rate = 0.0264f;
+			FileInputStream imgIn = new FileInputStream(new File(imagePath));
+			BufferedImage read = ImageIO.read(imgIn);
+			int imgW = read.getWidth();
+			int imgH = read.getHeight();
+			imgIn.close();
+			int w = (int) (5 / rate);
+			int h = (int) (w * imgH / imgW);
+			// int w2 = (int) (4 / rate);
+			// int h2 = (int) (w2*imgH/ imgW);
+			int w2 = w;
+			int h2 = h * 5 / 6;
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+			// "2018-01-02 10:51"
+			String printTime = sdf.format(new Date());
+			byte[] imgBytes = DocxManager.inputStream2ByteArray(new FileInputStream(imagePath),
+					true);
+			header.put("width", w);
+			header.put("height", h);
+			header.put("type", type);
+			header.put("content", imgBytes);
+			Map<String, Object> header2 = new HashMap<String, Object>();
+			header2.put("width", w2);
+			header2.put("height", h2);
+			header2.put("type", type);
+			header2.put("content", imgBytes);
+			param.put("tag_codeimg", header);
+			param.put("tag_imgs", header2);
+			param.put("tag_dst", destcode);
+			param.put("tag_yundantype", yundanType);
+			param.put("tag_jc", jCompany);
+			param.put("tag_time", printTime);
+			param.put("tag_codenumber", orderID);
+			param.put("tag_jname", jName);
+			param.put("tag_jphone", jPhone);
+			param.put("tag_jaddress", jAddress);
+			param.put("tag_dc", dCompany);
+			param.put("tag_dname", dName);
+			param.put("tag_dphone", dPhone);
+			param.put("tag_daddress", dAddress);
+			param.put("tag_tuoji", infoBuilder.toString() + pid+"_and");
+			param.put("tag_counts", counts);
+			param.put("tag_pt", payType);
+			param.put("tag_account", cardID);
+			FileInputStream inStream = new FileInputStream(templatePath);
+			FileUtils.fileCopy(inStream, newWord);
+			DocxManager.replaceTemplate(param, newWord);
+			System.out.println("=============ky:" + desfFile.getName());
+			// printer = "ZDesigner GK888d (EPL)";
+			DocxPrinter printUtils = new DocxPrinter(officeHome, printer, newWord);
+			try {
+				printUtils.print();
+				response.getWriter().append("ok").close();
+			} catch (OfficeException e) {
+				response.getWriter().append("error:" + e.getMessage()).close();
+			}
+			return;			
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-//		WordUtils.closeDocument(doc, true);
-		WordUtils.exit(ac);
-		ComThread.Release();
-		response.getWriter().append("ok").close();;
+		response.getWriter().append("Served at: ").append(request.getContextPath()).close();
 	}
 
 	/**
