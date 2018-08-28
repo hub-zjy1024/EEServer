@@ -19,8 +19,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import com.sun.star.beans.XPropertySet;
+import com.sun.star.bridge.UnoUrlResolver;
 import com.sun.star.bridge.XBridge;
 import com.sun.star.bridge.XBridgeFactory;
+import com.sun.star.bridge.XUnoUrlResolver;
 import com.sun.star.comp.helper.Bootstrap;
 import com.sun.star.connection.NoConnectException;
 import com.sun.star.connection.XConnection;
@@ -74,6 +76,25 @@ public class OfficeConnection implements OfficeContext {
 		logger.info(String.format("connecting to '%s'", unoUrl.getAcceptString()));
 		try {
 			XComponentContext localContext = Bootstrap.createInitialComponentContext(null);
+			//			 XUnoUrlResolver urlResolver = UnoUrlResolver.create(localContext);
+			//			 Object initialObject = urlResolver.resolve(
+			//				      "uno:"+unoUrl.getAcceptString()+";urp;StarOffice.ServiceManager");
+			//				  XMultiComponentFactory xOfficeFactory = (XMultiComponentFactory) OfficeUtils.cast(
+			//				      XMultiComponentFactory.class, initialObject);
+			//				  serviceManager=xOfficeFactory;
+			//				  // retrieve the component context as property (it is not yet exported from the office)
+			//				  // Query for the XPropertySet interface.
+			//				  XPropertySet xProperySet = (XPropertySet)OfficeUtils.cast( 
+			//				      XPropertySet.class, xOfficeFactory);
+			//				  
+			//				  // Get the default context from the office server.
+			//				  Object oDefaultContext = xProperySet.getPropertyValue("DefaultContext");
+			//				  // Query for the interface XComponentContext.
+			//				  XComponentContext xOfficeComponentContext = OfficeUtils.cast(
+			//				      XComponentContext.class, oDefaultContext);
+			//				  componentContext=xOfficeComponentContext;
+			// now create the desktop service
+			// NOTE: use the office component context here!
 			XMultiComponentFactory localServiceManager = localContext.getServiceManager();
 			XConnector connector = OfficeUtils.cast(XConnector.class, localServiceManager
 					.createInstanceWithContext("com.sun.star.connection.Connector", localContext));
@@ -91,6 +112,7 @@ public class OfficeConnection implements OfficeContext {
 			componentContext = OfficeUtils.cast(XComponentContext.class,
 					properties.getPropertyValue("DefaultContext"));
 			connected = true;
+			//			IllegalStateException
 			logger.info(String.format("connected: '%s'", unoUrl.getAcceptString()));
 			OfficeConnectionEvent connectionEvent = new OfficeConnectionEvent(this);
 			for (OfficeConnectionEventListener listener : connectionEventListeners) {
@@ -107,6 +129,10 @@ public class OfficeConnection implements OfficeContext {
 		return connected;
 	}
 
+	public void setDisConnected() {
+		connected = false;
+	}
+
 	public synchronized void disconnect() {
 		logger.info(String.format("disconnecting: '%s'", unoUrl.getAcceptString()));
 		bridgeComponent.dispose();
@@ -117,8 +143,9 @@ public class OfficeConnection implements OfficeContext {
 	}
 
 	public Object getService(String serviceName) {
-		if(!isConnected()){
-			throw new OfficeException(String.format("connection is Closed ,can't obtain service '%s'", serviceName));
+		if (!isConnected()) {
+			throw new OfficeException(
+					String.format("connection is Closed ,can't obtain service '%s'", serviceName));
 		}
 		try {
 			return serviceManager.createInstanceWithContext(serviceName, componentContext);

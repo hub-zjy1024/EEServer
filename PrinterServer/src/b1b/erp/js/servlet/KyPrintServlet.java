@@ -38,7 +38,6 @@ public class KyPrintServlet extends HttpServlet {
 	 */
 	public KyPrintServlet() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -169,7 +168,6 @@ public class KyPrintServlet extends HttpServlet {
 			FileInputStream inStream = new FileInputStream(templatePath);
 			FileUtils.fileCopy(inStream, newWord);
 			DocxManager.replaceTemplate(param, newWord);
-			System.out.println("=============ky:" + desfFile.getName());
 			// printer = "ZDesigner GK888d (EPL)";
 			DocxPrinter printUtils = new DocxPrinter(officeHome, printer, newWord);
 			try {

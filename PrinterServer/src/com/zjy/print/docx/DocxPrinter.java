@@ -1,29 +1,20 @@
 package com.zjy.print.docx;
 
-import java.util.concurrent.ArrayBlockingQueue;
-
 import com.zjy.print.docx.office.OfficeException;
-import com.zjy.print.docx.office.PooledOfficeManager;
-import com.zjy.print.docx.office.ProcessPoolOfficeManager;
 import com.zjy.print.docx.task.PrintTask;
 import com.zjy.print.docx.task.SaveDocTask;
 
 public class DocxPrinter {
 	private String printerName;
 	private String docxPath;
-	private PooledOfficeManager currentMgr = null;
-	private String officePath;
+
+	private SingleOoManager sigleOoManager;
 
 	public DocxPrinter(String officeHome, String printerName, String docxPath) {
 		super();
 		this.printerName = printerName;
 		this.docxPath = docxPath;
-		this.officePath = officeHome;
-		if (pManagers == null) {
-			pManagers = (ProcessPoolOfficeManager) new OpenOficeConnectionManager(officeHome,
-					arrayPorts).getOfficeManager();
-			pManagers.start();
-		}
+		sigleOoManager = SingleOoManager.getInstance(officeHome);
 	}
 
 	public static void main(String[] args) {
@@ -39,32 +30,17 @@ public class DocxPrinter {
 		printUtils.saveToPdf(name, outFile);
 	}
 
-	private static ArrayBlockingQueue<Integer> ports = new ArrayBlockingQueue<>(3);
-	static {
-		for (int i = 0; i < 3; i++) {
-			ports.add(8100 + i);
-		}
-	}
-
-	private static int[] arrayPorts = new int[1];
-	static {
-		for (int i = 0; i < arrayPorts.length; i++) {
-			arrayPorts[i] = 8100 + i;
-		}
-	}
-	private static ProcessPoolOfficeManager pManagers;
-
 	/**
 	 * 默认打印第一页,找不到打印机时会自动选择默认打印机
 	 */
 	public void print() throws OfficeException {
 		PrintTask task = new PrintTask(docxPath, printerName);
-		task.setHideWindow(true);
-		pManagers.execute(task);
+		//		task.setHideWindow(true);
+		sigleOoManager.excute(task);
 	}
 
 	public void saveToPdf(String inFile, String outFile) throws OfficeException {
 		SaveDocTask task = new SaveDocTask(inFile, outFile);
-		pManagers.execute(task);
+		sigleOoManager.excute(task);
 	}
 }

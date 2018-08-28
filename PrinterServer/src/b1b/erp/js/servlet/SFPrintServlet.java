@@ -149,7 +149,6 @@ public class SFPrintServlet extends HttpServlet {
 				}
 			}
 		}
-		System.out.println("SF=====" + UploadUtils.getCurrentAtSS() + "=====");
 		String wordDir = getServletContext().getInitParameter("dyjDir");
 		rootPath = wordDir;
 		officeHome = getServletContext().getInitParameter("openoffice_home");

@@ -109,14 +109,13 @@ public class PooledOfficeManager implements OfficeManager {
 					settings.getTaskExecutionTimeout()), timeoutException);
 		} catch (ExecutionException executionException) {
 			if (executionException.getCause() instanceof OfficeException) {
+				managedOfficeProcess.getConnection().setDisConnected();
 				throw (OfficeException) executionException.getCause();
 			}
 			throw new OfficeException("futureTask failed", executionException);
 		} catch (CancellationException e) {
-			// TODO Auto-generated catch block
 			logger.warning("TaskCancel: " + e.getMessage());
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			logger.warning("Thread Interrupted: " + e.getMessage());
 		}
 	}

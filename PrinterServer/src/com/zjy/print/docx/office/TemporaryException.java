@@ -24,4 +24,8 @@ class TemporaryException extends Exception {
         super(cause);
     }
 
+	public TemporaryException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
 }

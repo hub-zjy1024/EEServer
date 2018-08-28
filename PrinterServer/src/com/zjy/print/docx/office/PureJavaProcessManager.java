@@ -69,7 +69,7 @@ public class PureJavaProcessManager implements ProcessManager {
 			}
 			input.close();
 			Matcher matcher = compile.matcher(tempResult);
-			int pid = -1;
+			int pid = (int) PID_NOT_FOUND;
 			while (matcher.find()) {
 				String group = matcher.group();
 				if (matcher.end() == tempResult.length()) {
@@ -80,7 +80,7 @@ public class PureJavaProcessManager implements ProcessManager {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return -2;
+		return (int) PID_NOT_FOUND;
 	}
 
 	public int search2(String name) {

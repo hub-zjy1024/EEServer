@@ -16,7 +16,7 @@ import java.io.File;
 
 public class DefaultOfficeManagerConfiguration {
 
-	public static final long DEFAULT_RETRY_TIMEOUT = 120000L;
+	public static final long DEFAULT_RETRY_TIMEOUT = 15*1000L;
 
 	private File officeHome = OfficeUtils.getDefaultOfficeHome();
 	private OfficeConnectionProtocol connectionProtocol = OfficeConnectionProtocol.SOCKET;
@@ -25,8 +25,8 @@ public class DefaultOfficeManagerConfiguration {
 	private String[] runAsArgs = null;
 	private File templateProfileDir = null;
 	private File workDir = new File(System.getProperty("java.io.tmpdir"));
-	private long taskQueueTimeout = 30000L; // 30 seconds
-	private long taskExecutionTimeout = 120000L; // 2 minutes
+	private long taskQueueTimeout = 20*1000L; // 30 seconds
+	private long taskExecutionTimeout = 20*1000L; // 2 minutes
 	private int maxTasksPerProcess = 200;
 	private long retryTimeout = DEFAULT_RETRY_TIMEOUT;
 

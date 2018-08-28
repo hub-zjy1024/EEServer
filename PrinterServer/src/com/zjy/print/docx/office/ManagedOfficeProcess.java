@@ -60,8 +60,7 @@ public class ManagedOfficeProcess {
 		try {
 			future.get();
 		} catch (Exception exception) {
-			doTerminateProcess();
-			throw new OfficeException("failed to start and connect", exception);
+			logger.log(Level.WARNING, "failed to startAndWait", exception);
 		}
 	}
 
@@ -97,23 +96,23 @@ public class ManagedOfficeProcess {
 	}
 
 	public void restartDueToTaskTimeout() {
-//		Future<?> restartTask = executor.submit(new Runnable() {
-//			public void run() {
-//				try {
-//					logger.warning(" restartDueToTaskTimeout");
-//					doTerminateProcess();
-//				} catch (OfficeException officeException) {
-//					officeException.printStackTrace();
-//					logger.warning("doTerminateProcess failed:" + officeException);
-//				}
-//			}
-//		});
-//		try {
-//			restartTask.get();
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		//		Future<?> restartTask = executor.submit(new Runnable() {
+		//			public void run() {
+		//				try {
+		//					logger.warning(" restartDueToTaskTimeout");
+		//					doTerminateProcess();
+		//				} catch (OfficeException officeException) {
+		//					officeException.printStackTrace();
+		//					logger.warning("doTerminateProcess failed:" + officeException);
+		//				}
+		//			}
+		//		});
+		//		try {
+		//			restartTask.get();
+		//		} catch (Exception e) {
+		//			// TODO Auto-generated catch block
+		//			e.printStackTrace();
+		//		}
 		try {
 			logger.warning(" restartDueToTaskTimeout");
 			doTerminateProcess();
@@ -124,15 +123,15 @@ public class ManagedOfficeProcess {
 
 	}
 
-//	public void restartDueToLostConnection() {
-//		try {
-//			// doEnsureProcessExited();
-//			doStartProcessAndConnect();
-//		} catch (OfficeException officeException) {
-//			officeException.printStackTrace();
-//			logger.warning("could not restart process:" + officeException.getMessage());
-//		}
-//	}
+	//	public void restartDueToLostConnection() {
+	//		try {
+	//			// doEnsureProcessExited();
+	//			doStartProcessAndConnect();
+	//		} catch (OfficeException officeException) {
+	//			officeException.printStackTrace();
+	//			logger.warning("could not restart process:" + officeException.getMessage());
+	//		}
+	//	}
 	public void restartDueToLostConnection() {
 		executor.execute(new Runnable() {
 			public void run() {
@@ -152,26 +151,27 @@ public class ManagedOfficeProcess {
 			process.start();
 			new Retryable() {
 				int times = 0;
-
 				protected void attempt() throws TemporaryException, Exception {
 					try {
-						connection.connect();
+						if(process.isRunning()){
+							connection.connect();
+						}else{
+							throw new ConnectException("process doesn't running at:"+settings.getUnoUrl().getAcceptString());
+						}
 					} catch (ConnectException connectException) {
 						times++;
 						Integer exitCode = process.getExitCode();
-						logger.info(String.format("connect failed '%d' times ,exitcode:%d", times,
-								exitCode));
+						logger.info(String.format("connect failed '%d' times ,exitcode:%d,Exception:%s", times,
+								exitCode,connectException.getMessage()));
 						if (exitCode == null) {
 							// process is running; retry later
-							throw new TemporaryException(connectException);
+							throw new TemporaryException("process dosent't exit",connectException);
 						} else if (exitCode.equals(EXIT_CODE_NEW_INSTALLATION)) {
 							logger.log(Level.WARNING,
 									"office process died with exit code 81; restarting it");
-							process.start(true);
 							throw new TemporaryException(connectException);
 						} else {
-							process.start();
-							throw new TemporaryException(connectException);
+							throw new TemporaryException("exit code "+exitCode,connectException);
 						}
 					}
 				}
@@ -185,7 +185,7 @@ public class ManagedOfficeProcess {
 		} catch (Exception exception) {
 			exception.printStackTrace();
 			process.forciblyTerminate(settings.getRetryInterval(), settings.getRetryTimeout());
-			throw new OfficeException("could not establish connection", exception);
+			throw new OfficeException("other exception", exception);
 		}
 	}
 

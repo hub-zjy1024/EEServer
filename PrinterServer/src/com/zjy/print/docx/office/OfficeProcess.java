@@ -57,7 +57,7 @@ public class OfficeProcess {
 		if (!(existingPid == ProcessManager.PID_NOT_FOUND
 				|| existingPid == ProcessManager.PID_UNKNOWN)) {
 			logger.warning(
-					String.format("a process at  '%s' is already running; pid %d,kill process",
+					String.format("a process at  '%s' is already running; pid %d",
 							unoUrl.getAcceptString(), existingPid));
 			processManager.kill(process, existingPid);
 		}
@@ -69,6 +69,9 @@ public class OfficeProcess {
 		if (runAsArgs != null) {
 			command.addAll(Arrays.asList(runAsArgs));
 		}
+//		command.add("cmd /c");
+		command.add("cmd");
+		command.add("/c");
 		command.add(executable.getAbsolutePath());
 		command.add("-accept=" + unoUrl.getAcceptString() + ";urp;");
 		// command.add("-env:UserInstallation=" +
@@ -164,6 +167,17 @@ public class OfficeProcess {
 	}
 
 	public boolean isRunning() {
+		try {
+			pid = processManager.findPid(processQuery);
+			logger.info("now PID="+pid);
+			if(pid!=ProcessManager.PID_UNKNOWN&&pid!=ProcessManager.PID_NOT_FOUND){
+				return true;
+			}else{
+				return false;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		if (process == null) {
 			return false;
 		}

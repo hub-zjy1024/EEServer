@@ -21,7 +21,7 @@ public class PrintTask implements OfficeTask {
 	private int from = 1;
 	private int to = -1;
 	private boolean hideWindow = false;
-
+	double len =0;
 	public void setHideWindow(boolean hideWindow) {
 		this.hideWindow = hideWindow;
 	}
@@ -81,7 +81,6 @@ public class PrintTask implements OfficeTask {
 
 			xPrintable.print(options);
 			closeInterface(xPrintable);
-
 		} catch (DisposedException e) {
 			throw new OfficeException("loadComponentFromURL exception", e);
 		} catch (java.io.IOException e) {
@@ -95,9 +94,7 @@ public class PrintTask implements OfficeTask {
 		} finally {
 			// closeInterface(xPrintable);
 		}
-		double len = ((double) (System.currentTimeMillis() - time1)) / 1000;
-		System.out
-				.println(UploadUtils.getCurrentAtSS() + " finish print " + fileName + " in " + len);
+		 len = ((double) (System.currentTimeMillis() - time1)) / 1000;
 	}
 
 	public void setFirstPage(int from) {
@@ -110,7 +107,11 @@ public class PrintTask implements OfficeTask {
 
 	@Override
 	public String toString() {
-		return "print:" + fileName;
+		String end="";
+		if(len!=0){
+			end=" finished in "+len;
+		}
+		return "print:" + fileName+end;
 	}
 
 	public void closeInterface(Object obj) {

@@ -69,6 +69,7 @@ public class ProcessPoolOfficeManager implements OfficeManager {
 			logger.warning("acquireManager failed:" + task.toString());
 			throw new OfficeException("acquireManager failed:" + task.toString());
 		}
+		logger.info("at mgr:"+manager.getUrl().getAcceptString()+",executes "+task.toString());
 		try {
 			manager.execute(task);
 		} catch (OfficeException e) {
@@ -96,13 +97,6 @@ public class ProcessPoolOfficeManager implements OfficeManager {
 		} catch (InterruptedException interruptedException) {
 			throw new OfficeException("poll operation interrupted", interruptedException);
 		}
-	}
-
-	public PooledOfficeManager getManager(int i) {
-		if (i >= pooledManagers.length) {
-			return null;
-		}
-		return pooledManagers[i];
 	}
 
 	public void releaseManager(PooledOfficeManager manager) {
