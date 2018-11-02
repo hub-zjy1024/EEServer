@@ -1,6 +1,5 @@
 package b1b.erp.js.servlet;
 
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -14,21 +13,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.zjy.print.DocxManager;
-import com.zjy.print.docx.DocxPrinter;
-import com.zjy.print.docx.office.OfficeException;
+import com.jacob.activeX.ActiveXComponent;
+import com.jacob.com.ComThread;
+import com.jacob.com.Dispatch;
 
 import b1b.erp.js.Code128CCreator;
 import b1b.erp.js.utils.FileUtils;
 import b1b.erp.js.utils.Myuuid;
+import b1b.erp.js.utils.SingleActiveXComponent;
 import b1b.erp.js.utils.UploadUtils;
+import b1b.erp.js.utils.WordUtils;
 
 /**
  * Servlet implementation class SFPrintServlet
@@ -47,7 +47,6 @@ public class SFPrintServlet extends HttpServlet {
 
 	public static String rootPath;
 	private String pid;
-	private String officeHome;
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
@@ -72,19 +71,15 @@ public class SFPrintServlet extends HttpServlet {
 		String hasE = request.getParameter("hasE");
 		String jCompany = request.getParameter("j_company");
 		String dCompany = request.getParameter("d_company");
-		if (printer == null) {
-			printer = "";
+		pid= request.getParameter("pid");
+		if(jCompany==null){
+			jCompany="";
 		}
-		printer = getServletContext().getInitParameter("printer1");
-		pid = request.getParameter("pid");
-		if (jCompany == null) {
-			jCompany = "";
+		if(dCompany==null){
+			dCompany="";
 		}
-		if (dCompany == null) {
-			dCompany = "";
-		}
-		if (pid == null) {
-			pid = "";
+		if(pid==null){
+			pid="";
 		}
 		String[] orders = orderID.split(",");
 		if (destcode == null) {
@@ -126,7 +121,6 @@ public class SFPrintServlet extends HttpServlet {
 		if (dAddress == null) {
 			dAddress = "北京市海淀区";
 		}
-		System.out.println("goodinfos :" + goodinfos);
 		String[] infos;
 		if (goodinfos != null) {
 			infos = goodinfos.split("\\$");
@@ -149,9 +143,11 @@ public class SFPrintServlet extends HttpServlet {
 				}
 			}
 		}
+		System.out.println("SF=====" + UploadUtils.getCurrentAtSS() + "=====");
+		System.out.println("builder:" + builder.toString());
 		String wordDir = getServletContext().getInitParameter("dyjDir");
 		rootPath = wordDir;
-		officeHome = getServletContext().getInitParameter("openoffice_home");
+		System.out.println("currentCompany:"+dCompany);
 		PrintWriter writer = response.getWriter();
 		try {
 			for (int i = 0; i < orders.length; i++) {
@@ -160,24 +156,21 @@ public class SFPrintServlet extends HttpServlet {
 						dAddress, builder, hasE, jCompany, dCompany, request);
 			}
 		} catch (Exception e) {
-			String msg =e.getCause().getMessage();
-			System.out.println("error:"+msg);
-			writer.write("error:" + msg);
+			String msg = e.getMessage();
+			writer.write("error=" + msg);
 			writer.flush();
+			writer.close();
 			ByteArrayOutputStream bao = new ByteArrayOutputStream();
-			PrintWriter exWriter = new PrintWriter(bao);
-			e.printStackTrace(exWriter);
-			exWriter.flush();
+			PrintWriter errorRecorder = new PrintWriter(bao);
+			e.printStackTrace(errorRecorder);
+			errorRecorder.flush();
 			try {
-				String result= new String(bao.toByteArray(), "utf-8");
-				if(!result.contains("acquireManager")){
-					System.out.println(UploadUtils.getCurrentAtSS()+":[error]-" +result);
-				};
+				System.out.println("error-----" + new String(bao.toByteArray(), "utf-8"));
 			} catch (UnsupportedEncodingException e1) {
+				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			exWriter.close();
-			writer.close();
+			errorRecorder.close();
 			return;
 		}
 		writer.write("ok");
@@ -198,19 +191,21 @@ public class SFPrintServlet extends HttpServlet {
 			String dName, String dPhone, String dAddress, StringBuilder builder, String hasE,
 			String jC, String dC, HttpServletRequest request)
 			throws IOException, FileNotFoundException, UnsupportedEncodingException {
-		String templatePath = request.getServletContext().getRealPath("/docTemplate/sf210模板.docx");
+		String templatePath = request.getServletContext().getRealPath("/docTemplate/sf210模板.doc");
 		String mainOrder = orders[0];
 		String cOrder = orders[index];
+		System.out.println("currentOrder:" + cOrder);
 		if (yundanType.equals("150")) {
-			templatePath = request.getServletContext().getRealPath("/docTemplate/sf150模板.docx");
+			templatePath = request.getServletContext().getRealPath("/docTemplate/sf150模板.doc");
 		}
-		File mFile = new File(templatePath);
+		FileInputStream testInputStream = new FileInputStream(templatePath);
 		if (mainOrder == null) {
-			throw new IOException("error:运单号参数错误");
+			response.getWriter().append("error:运单号参数错误");
+			testInputStream.close();
+			return;
 		}
-		if (mFile.exists()) {
-			FileInputStream testInputStream = new FileInputStream(templatePath);
-			String savePath = rootPath + "SF/" + UploadUtils.getCurrentYearAndMonth() + "/";
+		if (testInputStream != null) {
+			String savePath = rootPath + "/SF/" + UploadUtils.getCurrentYearAndMonth() + "/";
 			String imgPath = savePath + "codeImg/";
 			File file = new File(savePath);
 			if (!file.exists()) {
@@ -220,86 +215,80 @@ public class SFPrintServlet extends HttpServlet {
 			if (!imgDir.exists()) {
 				imgDir.mkdirs();
 			}
-			String name = UploadUtils.getCurrentDay() + "-" + pid + "_" + cOrder + "_"
-					+ Myuuid.createRandom(4) + ".docx";
-			HashMap<String, Object> bMarksAndValue = new HashMap<>();
-			bMarksAndValue.put("${type}", serverType);
-			int len = orders.length;
-			if (len > 1) {
-				name = name + "_multiple.docx";
-				bMarksAndValue.put("${cs}", (index + 1) + "/" + len);
-				if (index == 0) {
-					bMarksAndValue.put("${morderid}", "母单号  " + mainOrder);
-					bMarksAndValue.put("${corderid}", "");
-				} else {
-					bMarksAndValue.put("${morderid}", "子单号  " + cOrder);
-					bMarksAndValue.put("${corderid}", "母单号  " + mainOrder);
-				}
-			} else {
-				bMarksAndValue.put("${corderid}", "");
-				bMarksAndValue.put("${cs}", "");
-				bMarksAndValue.put("${morderid}", "单号  " + mainOrder);
-			}
-
+			String name = UploadUtils.getCurrentDay()+"-"+pid + "_" + mainOrder+ "_" +Myuuid.createRandom(4)
+					+ ".doc";
 			String wordPath = savePath + name;
 			FileUtils.fileCopy(testInputStream, wordPath);
 			testInputStream.close();
-			bMarksAndValue.put("${destcode}", destcode);
-			bMarksAndValue.put("${paytype}", payType);
-			bMarksAndValue.put("${account}", cardID);
-			bMarksAndValue.put("${part}", payPerson);
-			bMarksAndValue.put("${price}", price);
-			bMarksAndValue.put("${dname}", dName);
-			bMarksAndValue.put("${dphone}", dPhone + " " + dC);
-			bMarksAndValue.put("${daddress}", dAddress);
-			bMarksAndValue.put("${jname}", jName);
-			bMarksAndValue.put("${jphone}", jPhone);
-			bMarksAndValue.put("${jaddress}", jAddress + " " + jC);
-			bMarksAndValue.put("${orderid}", cOrder);
-			if (hasE.equals("1")) {
-				bMarksAndValue.put("${e}", "E");
+			ActiveXComponent ac = SingleActiveXComponent.getApp();
+			// ActiveXComponent ac = new ActiveXComponent("Word.Application");
+			ac.setProperty("Visible", true);
+			Dispatch doc = WordUtils.openDocument(wordPath, ac);
+			HashMap<String, String> bMarksAndValue = new HashMap<>();
+			bMarksAndValue.put("业务类型", serverType);
+			int len = orders.length;
+			if (len > 1) {
+				bMarksAndValue.put("件数", (index + 1) + "/" + len);
+				if (index == 0) {
+					bMarksAndValue.put("主单号", "母单号  " + mainOrder);
+				} else {
+					bMarksAndValue.put("主单号", "子单号  " + cOrder + "\n母单号  " + mainOrder);
+				}
 			} else {
-				bMarksAndValue.put("${e}", "E");
+				bMarksAndValue.put("主单号", "单号  " + mainOrder);
 			}
-			bMarksAndValue.put("${tuoji}", builder.toString());
-			bMarksAndValue.put("${notes}",
-					getCurrentDate() + "  " + builder.toString() + "_" + pid+"_and");
+			bMarksAndValue.put("目的地", destcode);
+			bMarksAndValue.put("付款方式", payType);
+			bMarksAndValue.put("派件提示", "");
+			bMarksAndValue.put("月结账号", cardID);
+			bMarksAndValue.put("第三方地区", payPerson);
+			bMarksAndValue.put("声明价格", price);
+
+			bMarksAndValue.put("收件人", dName);
+			bMarksAndValue.put("收件人电话", dPhone + " " + dC);
+			bMarksAndValue.put("收件地址", dAddress);
+
+			bMarksAndValue.put("寄件人", jName);
+			bMarksAndValue.put("寄件人电话", jPhone);
+			bMarksAndValue.put("寄件人地址", jAddress);
+			if (hasE.equals("1")) {
+				bMarksAndValue.put("E标", "E");
+			}
+			bMarksAndValue.put("托寄物", builder.toString());
+			bMarksAndValue.put("子单号1", cOrder);
+			bMarksAndValue.put("收件人1", dName);
+			bMarksAndValue.put("收件人1电话", dPhone + " " + dC);
+			bMarksAndValue.put("收件人1地址", dAddress);
+			bMarksAndValue.put("寄件人1", jName);
+			bMarksAndValue.put("寄件人1电话", jPhone);
+			bMarksAndValue.put("寄件人1地址", jAddress);
+			bMarksAndValue.put("备注1", getCurrentDate() + builder.toString()+"_"+pid);
+			if (yundanType.equals("210")) {
+				bMarksAndValue.put("子单号2", cOrder);
+				bMarksAndValue.put("收件人2", dName);
+				bMarksAndValue.put("收件人2电话", dPhone + " " + dC);
+				bMarksAndValue.put("收件人2地址", dAddress);
+				bMarksAndValue.put("寄件人2", jName);
+				bMarksAndValue.put("寄件人2电话", jPhone);
+				bMarksAndValue.put("寄件人2地址", jAddress);
+				bMarksAndValue.put("备注2", getCurrentDate() + builder.toString()+"_"+pid);
+			}
+			WordUtils.replaceBookmark(bMarksAndValue, doc);
+			int childWidth = 45;
 			String childImgPath = imgPath + name + ".png";
 			Code128CCreator codeCreator = new Code128CCreator();
 			String barCode = codeCreator.getCode(cOrder, "");
-			int height = 40;
-			codeCreator.kiCode128C(barCode, 2, height, childImgPath);
-			float rate = 0.0264f;
-			FileInputStream imgIn = new FileInputStream(new File(childImgPath));
-			BufferedImage read = ImageIO.read(imgIn);
-			int imgW = read.getWidth();
-			int imgH = read.getHeight();
-			imgIn.close();
-			float cmW = 5.34f;
-			int w = (int) (cmW / rate);
-			int h = (int) (w * imgH / imgW);
-			int w2 = w;
-			int h2 = h * 5 / 6;
-			String type = childImgPath.substring(childImgPath.lastIndexOf(".") + 1,
-					childImgPath.length());
-			byte[] imgBytes = DocxManager.inputStream2ByteArray(new FileInputStream(childImgPath),
-					true);
-			Map<String, Object> header1 = new HashMap<String, Object>();
-			header1.put("width", w);
-			header1.put("height", h);
-			header1.put("type", type);
-			header1.put("content", imgBytes);
-			bMarksAndValue.put("${imgmain}", header1);
-			Map<String, Object> header2 = new HashMap<String, Object>();
-			header2.put("width", w2);
-			header2.put("height", h2);
-			header2.put("type", type);
-			header2.put("content", imgBytes);
-			bMarksAndValue.put("${imgchild}", header2);
-			DocxManager.replaceTemplate(bMarksAndValue, wordPath);
-			// printer="123";
-			DocxPrinter manager=  new DocxPrinter(officeHome, printer, wordPath);
-			manager.print();
+			codeCreator.kiCode128C(barCode, 2, 35, childImgPath);
+			WordUtils.insertImageAtBookmarkByMM("子条码1", childImgPath, childWidth, "width", doc);
+			if (yundanType.equals("210")) {
+				WordUtils.insertImageAtBookmarkByMM("子条码2", childImgPath, childWidth, "width", doc);
+			}
+			WordUtils.insertImageAtBookmarkByMM("主条码", childImgPath, childWidth, "width", doc);
+			System.out.println("getPrinter=" + printer);
+			String nowPrinter = ac.getProperty("ActivePrinter").toString();
+			System.out.println("nowPrinter:" + nowPrinter);
+			WordUtils.print2(doc, printer, ac);
+			WordUtils.closeDocument(doc, true);
 		}
 	}
 
@@ -340,11 +329,11 @@ public class SFPrintServlet extends HttpServlet {
 		String dAddress = map.get("d_address");
 		String jCompany = map.get("j_company");
 		String dCompany = map.get("d_company");
-		if (jCompany == null) {
-			jCompany = "";
+		if(jCompany==null){
+			jCompany="";
 		}
-		if (dCompany == null) {
-			dCompany = "";
+		if(dCompany==null){
+			dCompany="";
 		}
 		// 寄方，到方，第三方
 		String payType = map.get("payType");
@@ -401,12 +390,15 @@ public class SFPrintServlet extends HttpServlet {
 				}
 			}
 		}
+		System.out.println("builder:" + builder.toString());
 		String wordDir = getServletContext().getInitParameter("dyjDir");
 		rootPath = wordDir;
 		File barcodeDir = new File(rootPath, "/SF/codeImg/");
 		if (!barcodeDir.exists()) {
 			barcodeDir.mkdirs();
 		}
+		System.out.println(barcodeDir.getAbsolutePath());
+		ComThread.InitSTA(true);
 		// ComThread.InitMTA(true);
 		PrintWriter writer = response.getWriter();
 		for (int i = 0; i < orders.length; i++) {
@@ -417,6 +409,7 @@ public class SFPrintServlet extends HttpServlet {
 		writer.write("ok");
 		writer.flush();
 		writer.close();
+		ComThread.Release();
 		response.getWriter().append("over");
 	}
 
