@@ -66,6 +66,7 @@ public class KyPrintServlet extends HttpServlet {
 		String jCompany = request.getParameter("j_company");
 		String dCompany = request.getParameter("d_company");
 		String pid = request.getParameter("pid");
+		String sign = request.getParameter("signreturn");
 		if (jCompany == null) {
 			jCompany = "";
 		}
@@ -165,6 +166,11 @@ public class KyPrintServlet extends HttpServlet {
 			param.put("tag_counts", counts);
 			param.put("tag_pt", payType);
 			param.put("tag_account", cardID);
+			if("1".equals(sign)){
+				param.put("tag_sign", "签回单");
+			}else{
+				param.put("tag_sign", "");
+			}
 			FileInputStream inStream = new FileInputStream(templatePath);
 			FileUtils.fileCopy(inStream, newWord);
 			DocxManager.replaceTemplate(param, newWord);
