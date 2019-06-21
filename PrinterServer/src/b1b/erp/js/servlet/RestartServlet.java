@@ -32,7 +32,6 @@ public class RestartServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// TODO Auto-generated method stub
 		response.setContentType("text/html;charset=utf-8");
 		String flag = request.getParameter("flag");
 		BufferedReader breader = null;
@@ -61,7 +60,6 @@ public class RestartServlet extends HttpServlet {
 		}
 		System.err.println("killResult:" + builder.toString());
 		response.getWriter().append(builder.toString()).close();
-		System.err.println("kill process");
 	}
 
 	/**

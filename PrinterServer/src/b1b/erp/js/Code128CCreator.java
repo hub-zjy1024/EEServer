@@ -1,15 +1,12 @@
 package b1b.erp.js;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 
 import javax.imageio.ImageIO;

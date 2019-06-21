@@ -16,7 +16,9 @@ import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
+import java.util.concurrent.TimeoutException;
+
+import org.slf4j.LoggerFactory;
 
 public class ProcessPoolOfficeManager implements OfficeManager {
 
@@ -26,7 +28,8 @@ public class ProcessPoolOfficeManager implements OfficeManager {
 
 	private volatile boolean running = false;
 
-	private final Logger logger = Logger.getLogger(ProcessPoolOfficeManager.class.getName());
+	//	private final Logger logger = Logger.getLogger(ProcessPoolOfficeManager.class.getName());
+	private final org.slf4j.Logger logger = LoggerFactory.getLogger(ProcessPoolOfficeManager.class);
 
 	public ProcessPoolOfficeManager(File officeHome, UnoUrl[] unoUrls, String[] runAsArgs,
 			File templateProfileDir, File workDir, long retryTimeout, long taskQueueTimeout,
@@ -46,7 +49,6 @@ public class ProcessPoolOfficeManager implements OfficeManager {
 			settings.setProcessManager(processManager);
 			pooledManagers[i] = new PooledOfficeManager(settings);
 		}
-		logger.info("ProcessManager is " + processManager.getClass().getSimpleName());
 	}
 
 	public synchronized void start() throws OfficeException {
@@ -62,18 +64,25 @@ public class ProcessPoolOfficeManager implements OfficeManager {
 			throw new IllegalStateException("this OfficeManager is currently stopped");
 		}
 		PooledOfficeManager manager = null;
-
-		manager = acquireManager();
-		if (manager == null) {
-			running = true;
-			logger.warning("acquireManager failed:" + task.toString());
-			throw new OfficeException("acquireManager failed:" + task.toString());
-		}
-		logger.info("at mgr:"+manager.getUrl().getAcceptString()+",executes "+task.toString());
 		try {
+			manager = acquireManager();
+			if (manager == null) {
+				throw new TimeoutException("获取 manager失败");
+			}
+			running = true;
 			manager.execute(task);
 		} catch (OfficeException e) {
-			throw new OfficeException(String .format("execute failed:[%s]", task.toString()),e);
+			logger.warn("execute failed:[{}]", task.toString(), e);
+			throw new OfficeException(String.format("execute failed:[%s]", task.toString()), e);
+		} catch (InterruptedException e) {
+			String msg = "acquireManager interupted:" + task.toString();
+			logger.warn(msg, e);
+			throw new OfficeException(msg);
+		} catch (TimeoutException e) {
+			//			e.printStackTrace();
+			String msg = "acquireManager timeout " + task.toString();
+			logger.warn(msg, e);
+			throw new OfficeException(msg);
 		} finally {
 			if (manager != null) {
 				releaseManager(manager);
@@ -91,12 +100,8 @@ public class ProcessPoolOfficeManager implements OfficeManager {
 		logger.info("stopped processPooledManager");
 	}
 
-	public PooledOfficeManager acquireManager() {
-		try {
-			return pool.poll(taskQueueTimeout, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException interruptedException) {
-			throw new OfficeException("poll operation interrupted", interruptedException);
-		}
+	public PooledOfficeManager acquireManager() throws InterruptedException {
+		return pool.poll(taskQueueTimeout, TimeUnit.MILLISECONDS);
 	}
 
 	public void releaseManager(PooledOfficeManager manager) {

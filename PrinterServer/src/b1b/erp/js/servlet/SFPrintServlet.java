@@ -159,30 +159,25 @@ public class SFPrintServlet extends HttpServlet {
 						payType, payPerson, serverType, jName, jPhone, jAddress, dName, dPhone,
 						dAddress, builder, hasE, jCompany, dCompany, request);
 			}
-		} catch (Exception e) {
-			String msg =e.getCause().getMessage();
-			System.out.println("error:"+msg);
-			writer.write("error:" + msg);
+			writer.write("ok");
 			writer.flush();
+			writer.close();
+		} catch (Exception e) {
+			String msg = e.getMessage();
 			ByteArrayOutputStream bao = new ByteArrayOutputStream();
 			PrintWriter exWriter = new PrintWriter(bao);
 			e.printStackTrace(exWriter);
 			exWriter.flush();
 			try {
-				String result= new String(bao.toByteArray(), "utf-8");
-				if(!result.contains("acquireManager")){
-					System.out.println(UploadUtils.getCurrentAtSS()+":[error]-" +result);
-				};
+				String result = new String(bao.toByteArray(), "utf-8");
 			} catch (UnsupportedEncodingException e1) {
 				e1.printStackTrace();
 			}
 			exWriter.close();
+			writer.write("error:" + msg);
+			writer.flush();
 			writer.close();
-			return;
 		}
-		writer.write("ok");
-		writer.flush();
-		writer.close();
 	}
 
 	public String getCurrentDate() {
@@ -196,8 +191,8 @@ public class SFPrintServlet extends HttpServlet {
 			String cardID, String destcode, String yundanType, String printer, String payType,
 			String payPerson, String serverType, String jName, String jPhone, String jAddress,
 			String dName, String dPhone, String dAddress, StringBuilder builder, String hasE,
-			String jC, String dC, HttpServletRequest request)
-			throws IOException, FileNotFoundException, UnsupportedEncodingException {
+			String jC, String dC, HttpServletRequest request) throws IOException, OfficeException,
+			FileNotFoundException, UnsupportedEncodingException {
 		String templatePath = request.getServletContext().getRealPath("/docTemplate/sf210模板.docx");
 		String mainOrder = orders[0];
 		String cOrder = orders[index];
@@ -263,7 +258,7 @@ public class SFPrintServlet extends HttpServlet {
 			}
 			bMarksAndValue.put("${tuoji}", builder.toString());
 			bMarksAndValue.put("${notes}",
-					getCurrentDate() + "  " + builder.toString() + "_" + pid+"_and");
+					getCurrentDate() + "  " + builder.toString() + "_" + pid + "_and");
 			String childImgPath = imgPath + name + ".png";
 			Code128CCreator codeCreator = new Code128CCreator();
 			String barCode = codeCreator.getCode(cOrder, "");
@@ -298,7 +293,7 @@ public class SFPrintServlet extends HttpServlet {
 			bMarksAndValue.put("${imgchild}", header2);
 			DocxManager.replaceTemplate(bMarksAndValue, wordPath);
 			// printer="123";
-			DocxPrinter manager=  new DocxPrinter(officeHome, printer, wordPath);
+			DocxPrinter manager = new DocxPrinter(officeHome, printer, wordPath);
 			manager.print();
 		}
 	}
@@ -409,15 +404,26 @@ public class SFPrintServlet extends HttpServlet {
 		}
 		// ComThread.InitMTA(true);
 		PrintWriter writer = response.getWriter();
-		for (int i = 0; i < orders.length; i++) {
-			printYunDan(i, orders, response, price, cardID, destcode, yundanType, printer, payType,
-					payPerson, serverType, jName, jPhone, jAddress, dName, dPhone, dAddress,
-					builder, hasE, jCompany, dCompany, request);
+		String errMsg = "";
+		int code = 1;
+		try {
+			for (int i = 0; i < orders.length; i++) {
+				printYunDan(i, orders, response, price, cardID, destcode, yundanType, printer,
+						payType, payPerson, serverType, jName, jPhone, jAddress, dName, dPhone,
+						dAddress, builder, hasE, jCompany, dCompany, request);
+			}
+			code = 0;
+			writer.write("ok");
+			writer.close();
+		} catch (OfficeException e) {
+			errMsg = "officeEx," + errMsg;
+		} catch (Exception e) {
+			errMsg = "其他异常," + errMsg;
+		} catch (Throwable e) {
+			errMsg = "未知异常," + errMsg;
 		}
-		writer.write("ok");
-		writer.flush();
-		writer.close();
-		response.getWriter().append("over");
+		if (code == 1) {
+			response.getWriter().append(errMsg);
+		}
 	}
-
 }

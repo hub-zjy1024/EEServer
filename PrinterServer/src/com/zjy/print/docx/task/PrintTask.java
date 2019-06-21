@@ -1,5 +1,8 @@
 package com.zjy.print.docx.task;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XComponentLoader;
 import com.sun.star.io.IOException;
@@ -8,6 +11,7 @@ import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.XComponent;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XCloseable;
+import com.zjy.print.docx.DocxPrinter;
 import com.zjy.print.docx.office.OfficeContext;
 import com.zjy.print.docx.office.OfficeException;
 import com.zjy.print.docx.office.OfficeTask;
@@ -15,13 +19,13 @@ import com.zjy.print.docx.office.OfficeTask;
 import b1b.erp.js.utils.UploadUtils;
 
 public class PrintTask implements OfficeTask {
-
 	private String fileName;
 	private String printer;
 	private int from = 1;
 	private int to = -1;
 	private boolean hideWindow = false;
-	double len =0;
+	double len = 0;
+
 	public void setHideWindow(boolean hideWindow) {
 		this.hideWindow = hideWindow;
 	}
@@ -54,6 +58,7 @@ public class PrintTask implements OfficeTask {
 		XComponentLoader xCompLoader = UnoRuntime.queryInterface(XComponentLoader.class, oDesktop);
 		java.io.File sourceFile = new java.io.File(fileName);
 		com.sun.star.view.XPrintable xPrintable = null;
+		String errMsg = "";
 		try {
 			StringBuffer sUrl = new StringBuffer("file:///");
 			sUrl.append(sourceFile.getCanonicalPath().replace('\\', '/'));
@@ -61,7 +66,8 @@ public class PrintTask implements OfficeTask {
 			openValues[0] = new PropertyValue();
 			openValues[0].Name = "Hidden";
 			openValues[0].Value = Boolean.valueOf(hideWindow);
-			com.sun.star.lang.XComponent docComp = xCompLoader.loadComponentFromURL(sUrl.toString(), "_blank", 0, openValues);
+			com.sun.star.lang.XComponent docComp = xCompLoader.loadComponentFromURL(sUrl.toString(),
+					"_blank", 0, openValues);
 			xPrintable = UnoRuntime.queryInterface(com.sun.star.view.XPrintable.class, docComp);
 			com.sun.star.beans.PropertyValue propertyValue[] = new com.sun.star.beans.PropertyValue[1];
 			propertyValue[0] = new com.sun.star.beans.PropertyValue();
@@ -81,7 +87,7 @@ public class PrintTask implements OfficeTask {
 
 			xPrintable.print(options);
 			closeInterface(xPrintable);
-		} catch (DisposedException e) {
+		/*} catch (DisposedException e) {
 			throw new OfficeException("loadComponentFromURL exception", e);
 		} catch (java.io.IOException e) {
 			e.printStackTrace();
@@ -90,11 +96,13 @@ public class PrintTask implements OfficeTask {
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
+			throw new OfficeException("unknown exception", e);*/
+		} catch (Throwable e) {
 			throw new OfficeException("unknown exception", e);
-		} finally {
-			// closeInterface(xPrintable);
+		} 
+		finally {
 		}
-		 len = ((double) (System.currentTimeMillis() - time1)) / 1000;
+		len = ((double) (System.currentTimeMillis() - time1)) / 1000;
 	}
 
 	public void setFirstPage(int from) {
@@ -107,11 +115,11 @@ public class PrintTask implements OfficeTask {
 
 	@Override
 	public String toString() {
-		String end="";
-		if(len!=0){
-			end=" finished in "+len;
+		String end = "";
+		if (len != 0) {
+			end = " finished in " + len;
 		}
-		return "print:" + fileName+end;
+		return "print:" + fileName + end;
 	}
 
 	public void closeInterface(Object obj) {

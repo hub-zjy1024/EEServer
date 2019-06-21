@@ -1,13 +1,12 @@
 package com.zjy.print.docx;
 
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sun.javafx.PlatformUtil;
-import com.zjy.print.docx.office.DefaultOfficeManagerConfiguration;
 import com.zjy.print.docx.office.LinuxProcessManager;
-import com.zjy.print.docx.office.OfficeConnectionProtocol;
 import com.zjy.print.docx.office.OfficeManager;
 import com.zjy.print.docx.office.OfficeTask;
 import com.zjy.print.docx.office.ProcessManager;
@@ -16,6 +15,7 @@ import com.zjy.print.docx.office.PureJavaProcessManager;
 import com.zjy.print.docx.office.UnoUrl;
 
 public class SingleOoManager {
+	static Logger mLogger=LoggerFactory.getLogger(SingleOoManager.class);
 	public static OfficeManager oManager;
 	public static boolean isOpen = false;
 	public OfficeManager tManager;
@@ -27,7 +27,6 @@ public class SingleOoManager {
 	private int maxTasksPerProcess = 50;
 	private long retryTimeout = 15 * 1000;
 	public static SingleOoManager single;
-	public static Logger logger = Logger.getLogger("singleOomgr");
 	private static int[] arrayPorts = new int[1];
 	static {
 		for (int i = 0; i < arrayPorts.length; i++) {
@@ -41,7 +40,6 @@ public class SingleOoManager {
 				if (single == null) {
 					single = new SingleOoManager(oOffice_HOME, ports);
 					single.start();
-					logger.info("init oomMgr");
 				}
 			}
 		}

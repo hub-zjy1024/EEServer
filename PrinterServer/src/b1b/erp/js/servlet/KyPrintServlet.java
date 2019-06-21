@@ -48,6 +48,9 @@ public class KyPrintServlet extends HttpServlet {
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		response.setContentType("text/html;charset=utf-8");
+		String errMsg = "未知错误";
+		int errCode = 1;
+
 		String orderID = request.getParameter("orderID");
 		String cardID = request.getParameter("cardID");
 		String destcode = request.getParameter("destcode");
@@ -162,13 +165,13 @@ public class KyPrintServlet extends HttpServlet {
 			param.put("tag_dname", dName);
 			param.put("tag_dphone", dPhone);
 			param.put("tag_daddress", dAddress);
-			param.put("tag_tuoji", infoBuilder.toString() + pid+"_and");
+			param.put("tag_tuoji", infoBuilder.toString() + pid + "_and");
 			param.put("tag_counts", counts);
 			param.put("tag_pt", payType);
 			param.put("tag_account", cardID);
-			if("1".equals(sign)){
+			if ("1".equals(sign)) {
 				param.put("tag_sign", "签回单");
-			}else{
+			} else {
 				param.put("tag_sign", "");
 			}
 			FileInputStream inStream = new FileInputStream(templatePath);
@@ -178,15 +181,20 @@ public class KyPrintServlet extends HttpServlet {
 			DocxPrinter printUtils = new DocxPrinter(officeHome, printer, newWord);
 			try {
 				printUtils.print();
+				errMsg = "ok";
+				errCode = 0;
 				response.getWriter().append("ok").close();
+				return;
 			} catch (OfficeException e) {
-				response.getWriter().append("error:" + e.getMessage()).close();
+				errMsg = "office异常," + e.getMessage();
+				throw new IOException(errMsg);
 			}
-			return;			
 		} catch (IOException e) {
 			e.printStackTrace();
+			errMsg = "io错误," + e.getMessage();
 		}
-		response.getWriter().append("Served at: ").append(request.getContextPath()).close();
+		response.getWriter().append("error:" + errMsg).close();
+		//		response.getWriter().append("Served at: ").append(request.getContextPath()).close();
 	}
 
 	/**

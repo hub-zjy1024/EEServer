@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 import javax.security.auth.callback.Callback;
 
 import org.apache.commons.io.DirectoryWalker.CancelException;
+import org.slf4j.LoggerFactory;
 
 public class PooledOfficeManager implements OfficeManager {
 
@@ -37,7 +38,8 @@ public class PooledOfficeManager implements OfficeManager {
 	private Future<?> currentTask;
 	private UnoUrl url;
 
-	private final Logger logger = Logger.getLogger(getClass().getName());
+	//	private final Logger logger = Logger.getLogger(getClass().getName());
+	private final org.slf4j.Logger logger = LoggerFactory.getLogger(PooledOfficeManager.class);
 
 	private OfficeConnectionEventListener connectionEventListener = new OfficeConnectionEventListener() {
 		public void connected(OfficeConnectionEvent event) {
@@ -52,7 +54,7 @@ public class PooledOfficeManager implements OfficeManager {
 				// expected
 				stopping = false;
 			} else {
-				logger.warning("connection lost unexpectedly; attempting restart");
+				logger.warn("connection lost unexpectedly; attempting restart");
 				if (currentTask != null) {
 					currentTask.cancel(true);
 				}
@@ -79,44 +81,52 @@ public class PooledOfficeManager implements OfficeManager {
 			public void run() {
 				if (settings.getMaxTasksPerProcess() > 0
 						&& ++taskCount == settings.getMaxTasksPerProcess() + 1) {
-					logger.info(String.format("reached limit of %d maxTasksPerProcess: restarting",
+					logger.warn(String.format("reached limit of %d maxTasksPerProcess: restarting",
 							settings.getMaxTasksPerProcess()));
-					stopping=true;
-//					managedOfficeProcess.restartDueToLostConnection();
+					stopping = true;
+					//					managedOfficeProcess.restartDueToLostConnection();
 					managedOfficeProcess.restartAndWait();
 				}
 				if (!isRunning()) {
-					logger.warning(String.format("connection is not connected , restart"));
-					stopping=true;
+					logger.warn(String.format("connection is not connected , restart"));
+					stopping = true;
 					managedOfficeProcess.restartAndWait();
 				}
 				task.execute(getConnection());
 			}
 		});
 		currentTask = futureTask;
+		String errMsg = "";
 		try {
 			futureTask.get(settings.getTaskExecutionTimeout(), TimeUnit.MILLISECONDS);
 			logger.info(String.format("task finished [%s] ", task.toString()));
 		} catch (TimeoutException timeoutException) {
-			logger.warning(String.format(
-					"connection status= '%s' task did not complete within %s ms, restart PooledManager",
-					isRunning(), settings.getTaskExecutionTimeout()));
-//			stopping=true;
-//			managedOfficeProcess.restartAndWait();
-//			managedOfficeProcess.restartDueToTaskTimeout();
+			//			logger.warn(String.format(
+			//					"connection status= '%s' task did not complete within %s ms, restart PooledManager",
+			//					isRunning(), settings.getTaskExecutionTimeout()));
+			//			stopping=true;
+			//			managedOfficeProcess.restartAndWait();
+			//			managedOfficeProcess.restartDueToTaskTimeout();
 			managedOfficeProcess.restartDueToTaskTimeout();
-			throw new OfficeException(String.format("task did not complete within %s ms",
-					settings.getTaskExecutionTimeout()), timeoutException);
+			errMsg = String.format("task did not complete within %s ms",
+					settings.getTaskExecutionTimeout());
 		} catch (ExecutionException executionException) {
 			if (executionException.getCause() instanceof OfficeException) {
 				managedOfficeProcess.getConnection().setDisConnected();
-				throw (OfficeException) executionException.getCause();
+				errMsg = executionException.getCause().getMessage();
+			} else {
+				errMsg = executionException.getMessage();
 			}
-			throw new OfficeException("futureTask failed", executionException);
 		} catch (CancellationException e) {
-			logger.warning("TaskCancel: " + e.getMessage());
+			errMsg = "TaskCancel: " + e.getMessage();
 		} catch (InterruptedException e) {
-			logger.warning("Thread Interrupted: " + e.getMessage());
+			errMsg = "Thread Interrupted: " + e.getMessage();
+		} catch (Throwable e) {
+			errMsg = "other throwable," + e.getMessage();
+		}
+		if (!"".equals(errMsg)) {
+			logger.warn(errMsg);
+			throw new OfficeException("Task failed," + errMsg);
 		}
 	}
 
@@ -129,6 +139,7 @@ public class PooledOfficeManager implements OfficeManager {
 	}
 
 	public void start() throws OfficeException {
+		logger.info("start PooledOffice manager");
 		managedOfficeProcess.startAndWait();
 	}
 

@@ -26,7 +26,8 @@ class NamedThreadFactory implements ThreadFactory {
     private final boolean daemon;
 
     public NamedThreadFactory(String baseName) {
-        this(baseName, true);
+        this(baseName, false);
+//        this(baseName, true);
     }
 
     public NamedThreadFactory(String baseName, boolean daemon) {

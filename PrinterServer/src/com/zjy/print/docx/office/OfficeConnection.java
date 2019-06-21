@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.bridge.UnoUrlResolver;
 import com.sun.star.bridge.XBridge;
@@ -52,7 +54,7 @@ public class OfficeConnection implements OfficeContext {
 		public void disposing(EventObject event) {
 			if (connected) {
 				connected = false;
-				logger.info(String.format("disconnected: '%s'", unoUrl));
+				logger.warn(String.format("disconnected: '%s'", unoUrl));
 				OfficeConnectionEvent connectionEvent = new OfficeConnectionEvent(
 						OfficeConnection.this);
 				for (OfficeConnectionEventListener listener : connectionEventListeners) {
@@ -62,7 +64,8 @@ public class OfficeConnection implements OfficeContext {
 		}
 	};
 
-	private final Logger logger = Logger.getLogger(getClass().getName());
+	//	private final Logger logger = Logger.getLogger(getClass().getName());
+	private final org.slf4j.Logger logger = LoggerFactory.getLogger(getClass());
 
 	public OfficeConnection(UnoUrl unoUrl) {
 		this.unoUrl = unoUrl;
@@ -73,7 +76,7 @@ public class OfficeConnection implements OfficeContext {
 	}
 
 	public void connect() throws ConnectException {
-		logger.info(String.format("connecting to '%s'", unoUrl.getAcceptString()));
+		//logger.info(String.format("connecting to '%s'", unoUrl.getAcceptString()));
 		try {
 			XComponentContext localContext = Bootstrap.createInitialComponentContext(null);
 			//			 XUnoUrlResolver urlResolver = UnoUrlResolver.create(localContext);
@@ -113,7 +116,7 @@ public class OfficeConnection implements OfficeContext {
 					properties.getPropertyValue("DefaultContext"));
 			connected = true;
 			//			IllegalStateException
-			logger.info(String.format("connected: '%s'", unoUrl.getAcceptString()));
+			//logger.info(String.format("connected: '%s'", unoUrl.getAcceptString()));
 			OfficeConnectionEvent connectionEvent = new OfficeConnectionEvent(this);
 			for (OfficeConnectionEventListener listener : connectionEventListeners) {
 				listener.connected(connectionEvent);

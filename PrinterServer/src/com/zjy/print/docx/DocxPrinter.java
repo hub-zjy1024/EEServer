@@ -35,7 +35,7 @@ public class DocxPrinter {
 	 */
 	public void print() throws OfficeException {
 		PrintTask task = new PrintTask(docxPath, printerName);
-		//		task.setHideWindow(true);
+		task.setHideWindow(true);
 		sigleOoManager.excute(task);
 	}
 

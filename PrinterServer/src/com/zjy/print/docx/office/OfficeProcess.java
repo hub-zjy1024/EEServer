@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.LoggerFactory;
 
 public class OfficeProcess {
 
@@ -34,7 +35,13 @@ public class OfficeProcess {
 	private Process process;
 	private long pid = ProcessManager.PID_UNKNOWN;
 
-	private final Logger logger = Logger.getLogger(getClass().getName());
+	public long getPid() {
+		return pid;
+	}
+
+	//	private final Logger logger = Logger.getLogger(getClass().getName());
+	private final org.slf4j.Logger logger = LoggerFactory.getLogger(getClass());
+
 	private ProcessQuery processQuery;
 
 	public OfficeProcess(File officeHome, UnoUrl unoUrl, String[] runAsArgs,
@@ -56,10 +63,11 @@ public class OfficeProcess {
 		long existingPid = processManager.findPid(processQuery);
 		if (!(existingPid == ProcessManager.PID_NOT_FOUND
 				|| existingPid == ProcessManager.PID_UNKNOWN)) {
-			logger.warning(
-					String.format("a process at  '%s' is already running; pid %d",
-							unoUrl.getAcceptString(), existingPid));
-			processManager.kill(process, existingPid);
+			logger.warn(String.format(
+					"a process at  '%s' is already running, pid= %d,no need start process",
+					unoUrl.getAcceptString(), existingPid));
+			return;
+			//			processManager.kill(process, existingPid);
 		}
 		if (!restart) {
 			// prepareInstanceProfileDir();
@@ -69,7 +77,7 @@ public class OfficeProcess {
 		if (runAsArgs != null) {
 			command.addAll(Arrays.asList(runAsArgs));
 		}
-//		command.add("cmd /c");
+		//		command.add("cmd /c");
 		command.add("cmd");
 		command.add("/c");
 		command.add(executable.getAbsolutePath());
@@ -88,8 +96,8 @@ public class OfficeProcess {
 			addBasisAndUrePaths(processBuilder);
 		}
 		process = processBuilder.start();
-//		logger.info(String.format("starting at acceptString '%s' and profileDir '%s'", unoUrl,
-//				instanceProfileDir));
+		//		logger.info(String.format("starting at acceptString '%s' and profileDir '%s'", unoUrl,
+		//				instanceProfileDir));
 		logger.info(String.format("starting at acceptString '%s'", unoUrl));
 	}
 
@@ -101,7 +109,7 @@ public class OfficeProcess {
 
 	private void prepareInstanceProfileDir() throws OfficeException {
 		if (instanceProfileDir.exists()) {
-			logger.warning(String.format("profile dir '%s' already exists; deleting",
+			logger.warn(String.format("profile dir '%s' already exists; deleting",
 					instanceProfileDir.getName()));
 			deleteProfileDir();
 		}
@@ -128,7 +136,7 @@ public class OfficeProcess {
 					logger.info("could not delete profileDir: " + ioException.getMessage()
 							+ "; renamed it to " + oldProfileDir.getName());
 				} else {
-					logger.severe("could not rename profileDir: " + ioException.getMessage());
+					logger.warn("could not rename profileDir: " + ioException.getMessage());
 				}
 			}
 		}
@@ -139,7 +147,7 @@ public class OfficeProcess {
 		// http://wiki.services.openoffice.org/wiki/ODF_Toolkit/Efforts/Three-Layer_OOo
 		File basisLink = new File(officeHome, "basis-link");
 		if (!basisLink.isFile()) {
-			logger.fine("no %OFFICE_HOME%/basis-link found; "
+			logger.warn("no %OFFICE_HOME%/basis-link found; "
 					+ "assuming it's OOo 2.x and we don't need to append URE and Basic paths");
 			return;
 		}
@@ -162,17 +170,16 @@ public class OfficeProcess {
 		}
 		String path = environment.get(pathKey) + ";" + ureBin.getAbsolutePath() + ";"
 				+ basisProgram.getAbsolutePath();
-		logger.fine(String.format("setting %s to \"%s\"", pathKey, path));
+		logger.info(String.format("setting %s to \"%s\"", pathKey, path));
 		environment.put(pathKey, path);
 	}
 
 	public boolean isRunning() {
 		try {
 			pid = processManager.findPid(processQuery);
-			logger.info("now PID="+pid);
-			if(pid!=ProcessManager.PID_UNKNOWN&&pid!=ProcessManager.PID_NOT_FOUND){
+			if (pid != ProcessManager.PID_UNKNOWN && pid != ProcessManager.PID_NOT_FOUND) {
 				return true;
-			}else{
+			} else {
 				return false;
 			}
 		} catch (IOException e) {
@@ -226,7 +233,7 @@ public class OfficeProcess {
 		return retryable.getExitCode();
 	}
 
-	public int forciblyTerminate(long retryInterval, long retryTimeout){
+	public int forciblyTerminate(long retryInterval, long retryTimeout) {
 		try {
 			pid = processManager.findPid(processQuery);
 		} catch (IOException e1) {
@@ -237,7 +244,7 @@ public class OfficeProcess {
 		try {
 			processManager.kill(process, pid);
 		} catch (IOException e) {
-			logger.warning(String.format("fail to kill process: '%s' pid='%s'", unoUrl, pid));
+			logger.warn(String.format("fail to kill process: '%s' pid='%s'", unoUrl, pid));
 			e.printStackTrace();
 		}
 		return getExitCode(retryInterval, retryTimeout);
