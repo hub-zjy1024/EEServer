@@ -1,14 +1,9 @@
-package com.zjy.print.docx;
+package com.zjy.print.docx.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.sl.usermodel.GraphicalFrame;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;

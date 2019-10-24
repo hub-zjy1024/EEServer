@@ -1,4 +1,4 @@
-package com.zjy.print.docx;
+package com.zjy.print.docx.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
@@ -18,7 +18,8 @@ import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 
-import com.zjy.print.DocxManager;
+import com.zjy.print.docx.util.CustomXWPFDocument;
+import com.zjy.print.docx.util.DocxManager;
 
 public class DocxEditor {
 	private String officeHome;

@@ -17,9 +17,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.zjy.print.DocxManager;
-import com.zjy.print.docx.DocxPrinter;
+import com.zjy.print.bussiness.DocxPrinter;
 import com.zjy.print.docx.office.OfficeException;
+import com.zjy.print.docx.util.DocxManager;
 
 import b1b.erp.js.Code128CCreator;
 import b1b.erp.js.utils.FileUtils;

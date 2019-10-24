@@ -21,9 +21,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.zjy.print.DocxManager;
-import com.zjy.print.docx.DocxPrinter;
+import com.zjy.print.bussiness.DocxPrinter;
 import com.zjy.print.docx.office.OfficeException;
+import com.zjy.print.docx.util.DocxManager;
 
 import b1b.erp.js.Code128CCreator;
 import b1b.erp.js.utils.FileUtils;
@@ -413,8 +413,8 @@ public class SFPrintServlet extends HttpServlet {
 						dAddress, builder, hasE, jCompany, dCompany, request);
 			}
 			code = 0;
-			writer.write("ok");
-			writer.close();
+			writer.append("ok");
+			/*writer.close();*/
 		} catch (OfficeException e) {
 			errMsg = "officeEx," + errMsg;
 		} catch (Exception e) {
@@ -423,7 +423,7 @@ public class SFPrintServlet extends HttpServlet {
 			errMsg = "未知异常," + errMsg;
 		}
 		if (code == 1) {
-			response.getWriter().append(errMsg);
+			writer.append(errMsg);
 		}
 	}
 }

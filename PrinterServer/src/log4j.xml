@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>
+
+	<appender name="normarl_console_Appender" class="org.apache.log4j.ConsoleAppender">
+		<param name="encoding" value="UTF-8" />
+		<param name="target" value="System.out" />
+		<param name="threshold" value="INFO" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{HH:mm:ss,SSS} [%p] [%t] %c.%M %m%n" />
+		</layout>
+	</appender>
+	<appender name="Check_User_FIle_Appender" class="org.apache.log4j.MyDailyRollingFileAppender">
+		<param name="file" value="${catalina.home}/exlogs/dd_checkuser.log" />
+		<param name="append" value="true" />
+		<param name="encoding" value="UTF-8" />
+		<param name="maxBackupIndex" value="7" />
+		<param name="threshold" value="WARN" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{MM-DD HH:mm:ss,SSS} [%p] %C %m%n" />
+		</layout>
+	</appender>
+	<appender name="topsdk_appender" class="org.apache.log4j.RollingFileAppender">
+		<param name="file" value="${catalina.home}/exlogs/dd_topsdk.log" />
+		<param name="append" value="true" />
+		<param name="maxFileSize" value="512000" />
+		<param name="threshold" value="INFO" />
+		<param name="encoding" value="UTF-8" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{YYYY-MM-dd HH:mm:ss,SSS} [%p] [%t] %c.%M %m%n" />
+		</layout>
+	</appender>
+	<appender name="bussiness_FIle_Appender" class="org.apache.log4j.RollingFileAppender">
+		<param name="file" value="${catalina.home}/exlogs/dd_bussiness_warn.log" />
+		<param name="append" value="true" />
+		<param name="maxFileSize" value="512000" />
+		<param name="threshold" value="WARN" />
+		<param name="encoding" value="UTF-8" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{YYYY-MM-dd HH:mm:ss,SSS} [%p] [%t] %c.%M %m%n" />
+		</layout>
+	</appender>
+	<appender name="checkin_FIle_Appender" class="org.apache.log4j.RollingFileAppender">
+		<param name="file" value="${catalina.home}/exlogs/dd_checkin_warn.log" />
+		<param name="append" value="true" />
+		<param name="maxFileSize" value="512000" />
+		<param name="threshold" value="WARN" />
+		<param name="encoding" value="UTF-8" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{YYYY-MM-dd HH:mm:ss,SSS} [%p] [%t] %c.%M %m%n" />
+		</layout>
+	</appender>
+
+	<appender name="Check_User_console_Appender" class="org.apache.log4j.ConsoleAppender">
+		<param name="encoding" value="UTF-8" />
+		<param name="target" value="System.out" />
+		<param name="threshold" value="INFO" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{HH:mm:ss,SSS} [%p] [%t] %C %m%n" />
+		</layout>
+	</appender>
+	<appender name="ConsoleAppender" class="org.apache.log4j.ConsoleAppender">
+		<param name="encoding" value="UTF-8" />
+		<param name="threshold" value="INFO" />
+		<param name="target" value="System.out" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss,SSS} [%p] %C %m%n" />
+		</layout>
+	</appender>
+	<appender name="DD_sdk_consoleAppender" class="org.apache.log4j.ConsoleAppender">
+		<param name="encoding" value="UTF-8" />
+		<param name="threshold" value="WARN" />
+		<param name="target" value="System.out" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss,SSS} [%p] %C %m%n" />
+		</layout>
+	</appender>
+	<!-- ding open sdk log -->
+	<appender name="DING_OPEN_CLIENT_SDK_LOGGER_APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="file" value="${catalina.home}/exlogs/ding_open_client_sdk.log" />
+		<param name="append" value="true" />
+		<param name="encoding" value="UTF-8" />
+		<param name="threshold" value="WARN" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{HH:mm:ss,SSS} [%p] %C %m%n" />
+		</layout>
+	</appender>
+
+	<appender name="RollingFile_FileSize_Appender_printserver_normal"
+		class="org.apache.log4j.RollingFileAppender">
+		<param name="file" value="${catalina.home}/exlogs/printserver_normal.log" />
+		<param name="append" value="true" />
+		<param name="maxFileSize" value="512000" />
+		<param name="threshold" value="info" />
+		<param name="encoding" value="UTF-8" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{YYYY-MM-dd HH:mm:ss,SSS} [%p] [%t] %c.%M %m%n" />
+		</layout>
+	</appender>
+	<appender name="RollingFile_FileSize_Appender_printserver_print"
+		class="org.apache.log4j.RollingFileAppender">
+		<param name="file" value="${catalina.home}/exlogs/printserver_print.log" />
+		<param name="append" value="true" />
+		<param name="maxFileSize" value="512000" />
+		<param name="threshold" value="info" />
+		<param name="encoding" value="UTF-8" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{YYYY-MM-dd HH:mm:ss,SSS} [%p] [%t] %c.%M %m%n" />
+		</layout>
+	</appender>
+	<appender name="RollingFile_FileSize_Appender_printserver_print_warn"
+		class="org.apache.log4j.RollingFileAppender">
+		<param name="file" value="${catalina.home}/exlogs/printserver_print_warn.log" />
+		<param name="append" value="true" />
+		<param name="maxFileSize" value="512000" />
+		<param name="threshold" value="warn" />
+		<param name="encoding" value="UTF-8" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{YYYY-MM-dd HH:mm:ss,SSS} [%p] [%t] %c.%M %m%n" />
+		</layout>
+		
+	</appender>
+
+	<!-- <logger name="com.b1b.js.dd" additivity="false"> <level value="INFO" 
+		/> <appender-ref ref="Check_User_FIle_Appender" /> <appender-ref ref="Check_User_console_Appender" 
+		/> </logger> -->
+	<logger name="com.b1b.js.dd.checkin" additivity="true">
+		<level value="INFO" />
+		<appender-ref ref="checkin_FIle_Appender" />
+	</logger>
+	<logger name="com.b1b.js.dd.bussiness" additivity="true">
+		<level value="INFO" />
+		<appender-ref ref="bussiness_FIle_Appender" />
+	</logger>
+	<logger name="com" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="normarl_console_Appender" />
+		<appender-ref ref="RollingFile_FileSize_Appender_printserver_normal" />
+	</logger>
+	<logger name="com.zjy.print" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="normarl_console_Appender" />
+		<appender-ref ref="RollingFile_FileSize_Appender_printserver_print" />
+		<appender-ref ref="RollingFile_FileSize_Appender_printserver_print_warn" />
+	</logger>
+
+</log4j:configuration>

@@ -1,8 +1,9 @@
-package com.zjy.print.docx;
+package com.zjy.print.bussiness;
 
 import com.zjy.print.docx.office.OfficeException;
 import com.zjy.print.docx.task.PrintTask;
 import com.zjy.print.docx.task.SaveDocTask;
+import com.zjy.print.docx.util.SingleOoManager;
 
 public class DocxPrinter {
 	private String printerName;

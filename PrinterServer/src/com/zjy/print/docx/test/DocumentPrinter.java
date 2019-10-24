@@ -1,4 +1,4 @@
-package com.zjy.print;
+package com.zjy.print.docx.test;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -23,7 +23,6 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 import com.sun.star.util.XCloseable;
-import com.zjy.print.docx.OpenOficeConnectionManager;
 
 public class DocumentPrinter {
 	private static AtomicInteger bridgeIndex = new AtomicInteger();

@@ -11,7 +11,7 @@ import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.XComponent;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XCloseable;
-import com.zjy.print.docx.DocxPrinter;
+import com.zjy.print.bussiness.DocxPrinter;
 import com.zjy.print.docx.office.OfficeContext;
 import com.zjy.print.docx.office.OfficeException;
 import com.zjy.print.docx.office.OfficeTask;
@@ -101,8 +101,8 @@ public class PrintTask implements OfficeTask {
 			throw new OfficeException("unknown exception", e);
 		} 
 		finally {
+			len = ((double) (System.currentTimeMillis() - time1)) / 1000;
 		}
-		len = ((double) (System.currentTimeMillis() - time1)) / 1000;
 	}
 
 	public void setFirstPage(int from) {

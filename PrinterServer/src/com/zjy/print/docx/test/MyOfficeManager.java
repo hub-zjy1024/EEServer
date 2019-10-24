@@ -10,7 +10,7 @@
 // 2. The Apache License, Version 2.0
 //    -> http://www.apache.org/licenses/LICENSE-2.0.txt
 //
-package com.zjy.print.docx;
+package com.zjy.print.docx.test;
 
 import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;

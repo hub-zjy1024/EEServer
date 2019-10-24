@@ -1,4 +1,4 @@
-package com.zjy.print;
+package com.zjy.print.docx.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -25,10 +25,11 @@ import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPPr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSpacing;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STLineSpacingRule.Enum;
-
-import com.zjy.print.docx.CustomXWPFDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DocxManager {
+	static Logger mLogger = LoggerFactory.getLogger(DocxManager.class);
 
 	/**
 	 * 根据指定的参数值、模板，生成 word 文档
@@ -307,19 +308,23 @@ public class DocxManager {
 	}
 
 	public static void replaceTemplate(Map<String, Object> map, String templatePath) {
+		long time0 = System.currentTimeMillis();
 		try {
 			CustomXWPFDocument doc = DocxManager.generateWord(map, templatePath);
-			String tempFile=templatePath + ".temp.docx";
+			String tempFile = templatePath + ".temp.docx";
 			FileOutputStream os = new FileOutputStream(templatePath + ".temp.docx");
 			doc.write(os);
 			os.close();
 			doc.close();
-			File file=new File(tempFile);
+			File file = new File(tempFile);
 			file.delete();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		long time2 = System.currentTimeMillis();
+		long exTime = time2 - time0;
+//		mLogger.warn("replaceTime=" + exTime);
 	}
 }
