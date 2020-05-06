@@ -1,22 +1,13 @@
 package com.zjy.print.docx.task;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XComponentLoader;
-import com.sun.star.io.IOException;
-import com.sun.star.lang.DisposedException;
-import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.XComponent;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XCloseable;
-import com.zjy.print.bussiness.DocxPrinter;
 import com.zjy.print.docx.office.OfficeContext;
 import com.zjy.print.docx.office.OfficeException;
 import com.zjy.print.docx.office.OfficeTask;
-
-import b1b.erp.js.utils.UploadUtils;
 
 public class PrintTask implements OfficeTask {
 	private String fileName;
@@ -98,7 +89,7 @@ public class PrintTask implements OfficeTask {
 		} catch (Exception e) {
 			throw new OfficeException("unknown exception", e);*/
 		} catch (Throwable e) {
-			throw new OfficeException("unknown exception", e);
+			throw new OfficeException("打印过程出错", e);
 		} 
 		finally {
 			len = ((double) (System.currentTimeMillis() - time1)) / 1000;

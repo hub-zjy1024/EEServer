@@ -176,7 +176,7 @@ public class DocxManager {
 			for (; true;) {
 				tempIndex = indexOf;
 				indexOf = str.indexOf("\n", tempIndex + 1);
-				System.out.println("index:" + indexOf);
+				mLogger.info("index:" + indexOf);
 				ParagraphAlignment alignment = paragraph.getAlignment();
 				String styleID = paragraph.getStyleID();
 				String fontFamily = run.getFontFamily();
@@ -184,7 +184,7 @@ public class DocxManager {
 				CTPPr pPPr = getParagraphCTPPr(paragraph);
 				CTSpacing pSpacing = pPPr.getSpacing();
 				if (pSpacing == null) {
-					System.out.println("origin CTSpacing null");
+					mLogger.info("origin CTSpacing null");
 					pSpacing = pPPr.addNewSpacing();
 				}
 				BigInteger line = pSpacing.getLine();
@@ -219,7 +219,7 @@ public class DocxManager {
 				pPPr = getParagraphCTPPr(createParagraph);
 				CTSpacing nSpacing = pPPr.getSpacing();
 				if (nSpacing == null) {
-					System.out.println("new CTSpacing null");
+					mLogger.info("new CTSpacing null");
 					nSpacing = pPPr.addNewSpacing();
 				}
 				nSpacing.setLine(line);
@@ -280,7 +280,7 @@ public class DocxManager {
 				try {
 					in.close();
 				} catch (Exception e2) {
-					System.out.println("关闭流失败:" + e2.getMessage());
+					mLogger.warn("关闭流失败:" + e2.getMessage());
 				}
 			}
 		}

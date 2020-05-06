@@ -28,7 +28,7 @@ public class ProcessPoolOfficeManager implements OfficeManager {
 
 	private volatile boolean running = false;
 
-	//	private final Logger logger = Logger.getLogger(ProcessPoolOfficeManager.class.getName());
+	// private final Logger logger = Logger.getLogger(ProcessPoolOfficeManager.class.getName());
 	private final org.slf4j.Logger logger = LoggerFactory.getLogger(ProcessPoolOfficeManager.class);
 
 	public ProcessPoolOfficeManager(File officeHome, UnoUrl[] unoUrls, String[] runAsArgs,
@@ -73,16 +73,16 @@ public class ProcessPoolOfficeManager implements OfficeManager {
 			manager.execute(task);
 		} catch (OfficeException e) {
 			logger.warn("execute failed:[{}]", task.toString(), e);
-			throw new OfficeException(String.format("execute failed:[%s]", task.toString()), e);
+			throw new OfficeException("任务其他异常", e);
 		} catch (InterruptedException e) {
 			String msg = "acquireManager interupted:" + task.toString();
 			logger.warn(msg, e);
-			throw new OfficeException(msg);
+			throw new OfficeException("任务异常中断");
 		} catch (TimeoutException e) {
-			//			e.printStackTrace();
+			// e.printStackTrace();
 			String msg = "acquireManager timeout " + task.toString();
 			logger.warn(msg, e);
-			throw new OfficeException(msg);
+			throw new OfficeException("任务超时");
 		} finally {
 			if (manager != null) {
 				releaseManager(manager);

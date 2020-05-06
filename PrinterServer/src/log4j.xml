@@ -128,7 +128,7 @@
 		<level value="INFO" />
 		<appender-ref ref="checkin_FIle_Appender" />
 	</logger>
-	<logger name="com.b1b.js.dd.bussiness" additivity="true">
+	<logger name="com.b1b.js.bussiness" additivity="true">
 		<level value="INFO" />
 		<appender-ref ref="bussiness_FIle_Appender" />
 	</logger>
