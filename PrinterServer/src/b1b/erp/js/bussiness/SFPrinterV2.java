@@ -31,23 +31,34 @@ public class SFPrinterV2 {
 	private String wordDir;
 	private String rootPath;
 	private String printer;
-	public static boolean isDebug = true;
+	public static boolean isDebug = false;
 	String savePath = "";
 
-	// static Logger mLogger = LoggerFactory.getLogger(SFPrinterV2.class);
 	static org.apache.log4j.Logger mLogger = org.apache.log4j.Logger.getLogger(SFPrinterV2.class);
+	String yundanType;
 
 	public SFPrinterV2(HttpServletRequest request) {
 		super();
 		this.request = request;
-		templatePath = request.getServletContext().getRealPath("/docTemplate/sf210模板.docx");
-		if (isDebug) {
-			templatePath = "D:/dyingjia/运单/yundan_顺丰/2020年4月30日/sf_150_v2.docx";
+		yundanType = request.getParameter("yundanType");
+		if ("210".equals(yundanType)) {
+			templatePath = request.getServletContext().getRealPath("/docTemplate/sf_210_v2.docx");
+		} else {
+			templatePath = request.getServletContext().getRealPath("/docTemplate/sf_150_v2.docx");
 		}
 		wordDir = request.getServletContext().getInitParameter("dyjDir");
 		rootPath = wordDir;
 		officeHome = request.getServletContext().getInitParameter("openoffice_home");
-		printer = "";
+		printer = request.getServletContext().getInitParameter("printer1");
+		if (isDebug) {
+			if ("210".equals(yundanType)) {
+				templatePath = "D:/dyingjia/运单/yundan_顺丰/2020年4月30日/sf_210_v2.docx";
+			} else {
+				templatePath = "D:/dyingjia/运单/yundan_顺丰/2020年4月30日/sf_150_v2.docx";
+			}
+			printer = "BTP-L540H";
+		}
+
 	}
 
 	public void testApi() throws Exception {
@@ -59,13 +70,13 @@ public class SFPrinterV2 {
 		//
 		minfo.j_name = "寄张三";
 		minfo.j_phone = "12312312311";
-//		minfo.j_phone = phoneEncode(minfo.j_phone);
+		// minfo.j_phone = phoneEncode(minfo.j_phone);
 		minfo.j_comp = "北京远大创新";
 		minfo.j_addr = "北京市海淀区中关村1+1大厦";
 		//
 		minfo.d_name = "收李四";
 		minfo.d_phone = "13311238742";
-//		minfo.d_phone = phoneEncode(minfo.d_phone);
+		// minfo.d_phone = phoneEncode(minfo.d_phone);
 
 		minfo.d_comp = "深圳创新恒远";
 		minfo.d_addr = "深圳市莆田区姐姐附近的十分讲究见附件附件姐姐姐夫姐夫亟待解决分解方法";
@@ -86,7 +97,7 @@ public class SFPrinterV2 {
 	}
 
 	public void Print(YundanInfo minfo) throws Exception {
-		savePath = rootPath + "SF/" + UploadUtils.getCurrentYearAndMonth() + "/";
+		savePath = rootPath + "SF_V2/" + UploadUtils.getCurrentYearAndMonth() + "/";
 		File file = new File(savePath);
 		if (!file.exists()) {
 			file.mkdirs();
@@ -109,7 +120,7 @@ public class SFPrinterV2 {
 				FileUtils.fileCopy(testInputStream, filePath);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
-				mLogger.warn("template error",e);
+				mLogger.warn("template error", e);
 				throw new IOException("文件不存在");
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -127,43 +138,31 @@ public class SFPrinterV2 {
 		}
 	}
 
-/*	
-	function getFormatYunStr(mCode){
-		var index=[3,3,3,4];
-		var finalCode="";
-		var tIndx=0;
-		for(var i=0;i<index.length;i++){
-			var tempIndex=index[i];
-			if(tIndx+tempIndex>mCode.length){
-				break;
-			}
-			var StrCode=mCode.slice(tIndx,tIndx+tempIndex);
-			finalCode+=StrCode;
-			finalCode+=" ";
-			tIndx+=tempIndex;
-		}
-		finalCode="SF "+finalCode;
-		return finalCode;
-	}
-*/
+	/*
+	 * function getFormatYunStr(mCode){ var index=[3,3,3,4]; var finalCode=""; var tIndx=0; for(var
+	 * i=0;i<index.length;i++){ var tempIndex=index[i]; if(tIndx+tempIndex>mCode.length){ break; }
+	 * var StrCode=mCode.slice(tIndx,tIndx+tempIndex); finalCode+=StrCode; finalCode+=" ";
+	 * tIndx+=tempIndex; } finalCode="SF "+finalCode; return finalCode; }
+	 */
 	private static String yundanIDFormat(String mCode) {
-		int []index=new int[]{2,3,3,3,4} ;
-		String finalCode="";
-		int tIndx=0;
-		for(int i=0;i<index.length;i++){
-			int tempIndex=index[i];
-			int endIndex= tIndx+tempIndex;
-			if(endIndex>mCode.length()){
+		int[] index = new int[] { 2, 3, 3, 3, 4 };
+		String finalCode = "";
+		int tIndx = 0;
+		for (int i = 0; i < index.length; i++) {
+			int tempIndex = index[i];
+			int endIndex = tIndx + tempIndex;
+			if (endIndex > mCode.length()) {
 				break;
 			}
-			String StrCode=mCode.substring(tIndx,endIndex);
-			finalCode+=StrCode;
-			finalCode+=" ";
-			tIndx+=tempIndex;
+			String StrCode = mCode.substring(tIndx, endIndex);
+			finalCode += StrCode;
+			finalCode += " ";
+			tIndx += tempIndex;
 		}
 		return finalCode;
 	}
-		private static String phoneEncode(String mPhone) {
+
+	private static String phoneEncode(String mPhone) {
 		String token = "*";
 		int tokenCount = 4;
 		int start = 3;
@@ -189,12 +188,6 @@ public class SFPrinterV2 {
 		if (!imgDir.exists()) {
 			imgDir.mkdirs();
 		}
-		// barcode
-		// code_index
-		// code_main
-		// maincode_str
-		// code_child
-		// childcode_str
 		String maincode_str = "母单号";
 		String code_main = mainCode;
 		String code_child = "";
@@ -202,14 +195,14 @@ public class SFPrinterV2 {
 		if (!mainCode.equals(child)) {
 			childcode_str = "子单号";
 			code_child = child;
-			code_child=yundanIDFormat(code_child);
+			code_child = yundanIDFormat(code_child);
 		}
-		code_main=yundanIDFormat(code_main);
-		minfo.j_phone=phoneEncode(minfo.j_phone);
-		minfo.d_phone=phoneEncode(minfo.d_phone);
-		
+		code_main = yundanIDFormat(code_main);
+		minfo.j_phone = phoneEncode(minfo.j_phone);
+		minfo.d_phone = phoneEncode(minfo.d_phone);
+
 		HashMap<String, Object> bMarksAndValue = new HashMap<>();
-		bMarksAndValue.put("code_index", index);
+		bMarksAndValue.put("index", index);
 		bMarksAndValue.put("destRouteLable", minfo.destRouteLable);
 
 		bMarksAndValue.put("code_child", code_child);
@@ -312,6 +305,30 @@ public class SFPrinterV2 {
 		header2.put("type", type);
 		header2.put("content", imgBytes2);
 		bMarksAndValue.put("qr_code", header2);
+
+		if ("210".equals(yundanType)) {
+			header2 = new HashMap<String, Object>();
+			childImgPath = imgPath + imageFileName + "_2.png";
+			SFPrinterUtil.makeCode128B(child, 10, childImgPath);
+			imgBytes = DocxManager.inputStream2ByteArray(new FileInputStream(childImgPath), true);
+			imgIn = new FileInputStream(new File(childImgPath));
+			read = ImageIO.read(imgIn);
+			imgW = read.getWidth();
+			imgH = read.getHeight();
+			imgIn.close();
+			cmW = 5.6f;
+			w = (int) (cmW / rate);
+			h = (int) (0.5f / rate);
+			w2 = w;
+			h2 = h;
+			// 5.6
+			type = childImgPath.substring(childImgPath.lastIndexOf(".") + 1, childImgPath.length());
+			header2.put("width", w2);
+			header2.put("height", h2);
+			header2.put("type", type);
+			header2.put("content", imgBytes);
+			bMarksAndValue.put("barcode2", header2);
+		}
 		DocxManager.replaceTemplate(bMarksAndValue, wordPath);
 		mLogger.info(String.format("officeHome=%s{},wordPath=%s", officeHome, wordPath));
 		DocxPrinter manager = new DocxPrinter(officeHome, printer, wordPath);
@@ -320,7 +337,7 @@ public class SFPrinterV2 {
 		} catch (OfficeException e) {
 			throw new IOException(e.getMessage());
 		} catch (Exception e) {
-			throw new IOException("其他异常,"+e.getMessage());
+			throw new IOException("其他异常," + e.getMessage());
 		}
 	}
 }

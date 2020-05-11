@@ -26,9 +26,11 @@ import com.zjy.print.docx.office.OfficeException;
 import com.zjy.print.docx.util.DocxManager;
 
 import b1b.erp.js.Code128CCreator;
+import b1b.erp.js.bussiness.SFPrinterUtil;
 import b1b.erp.js.utils.FileUtils;
 import b1b.erp.js.utils.Myuuid;
 import b1b.erp.js.utils.UploadUtils;
+import b1b.erp.js.utils.ex.NullPointExHandler;
 
 /**
  * Servlet implementation class SFPrintServlet
@@ -162,6 +164,12 @@ public class SFPrintServlet extends HttpServlet {
 			writer.write("ok");
 			writer.flush();
 			writer.close();
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+			String result = NullPointExHandler.getErrMsg(e);
+			writer.write("error:缺少必要参数," + result);
+			writer.flush();
+			writer.close();
 		} catch (Exception e) {
 			String msg = e.getMessage();
 			ByteArrayOutputStream bao = new ByteArrayOutputStream();
@@ -260,13 +268,22 @@ public class SFPrintServlet extends HttpServlet {
 			bMarksAndValue.put("${notes}",
 					getCurrentDate() + "  " + builder.toString() + "_" + pid + "_and");
 			String childImgPath = imgPath + name + ".png";
-			Code128CCreator codeCreator = new Code128CCreator();
-			String barCode = codeCreator.getCode(cOrder, "");
-			int height = 40;
-			codeCreator.kiCode128C(barCode, 2, height, childImgPath);
+			// Code128CCreator codeCreator = new Code128CCreator();
+			// String barCode = codeCreator.getCode(cOrder, "");
+			// int height = 40;
+			// codeCreator.kiCode128C(barCode, 2, height, childImgPath);
+			try {
+				SFPrinterUtil.makeCode128B(cOrder, 40, childImgPath);
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new IOException("生成条码失败," + cOrder);
+			}
 			float rate = 0.0264f;
 			FileInputStream imgIn = new FileInputStream(new File(childImgPath));
 			BufferedImage read = ImageIO.read(imgIn);
+			if (read == null) {
+				throw new IOException("生成条码异常," + cOrder);
+			}
 			int imgW = read.getWidth();
 			int imgH = read.getHeight();
 			imgIn.close();
@@ -414,7 +431,7 @@ public class SFPrintServlet extends HttpServlet {
 			}
 			code = 0;
 			writer.append("ok");
-			/*writer.close();*/
+			/* writer.close(); */
 		} catch (OfficeException e) {
 			errMsg = "officeEx," + errMsg;
 		} catch (Exception e) {

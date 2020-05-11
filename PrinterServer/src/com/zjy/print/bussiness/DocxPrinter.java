@@ -11,6 +11,7 @@ public class DocxPrinter {
 
 	private SingleOoManager sigleOoManager;
 
+	public boolean isDebug=false;
 	public DocxPrinter(String officeHome, String printerName, String docxPath) {
 		super();
 		this.printerName = printerName;
@@ -36,7 +37,9 @@ public class DocxPrinter {
 	 */
 	public void print() throws OfficeException {
 		PrintTask task = new PrintTask(docxPath, printerName);
-		task.setHideWindow(true);
+		if(!isDebug){
+			task.setHideWindow(true);
+		}
 		sigleOoManager.excute(task);
 	}
 
