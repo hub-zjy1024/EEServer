@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.xmlbeans.impl.xb.xsdschema.All.MinOccurs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +44,9 @@ public class SFPrinterV2 {
 		yundanType = request.getParameter("yundanType");
 		if ("210".equals(yundanType)) {
 			templatePath = request.getServletContext().getRealPath("/docTemplate/sf_210_v2.docx");
-		} else {
+		} else if ("180".equals(yundanType)) {
+			templatePath = request.getServletContext().getRealPath("/docTemplate/sf_180_v2.docx");
+		} else if ("150".equals(yundanType)) {
 			templatePath = request.getServletContext().getRealPath("/docTemplate/sf_150_v2.docx");
 		}
 		wordDir = request.getServletContext().getInitParameter("dyjDir");
@@ -53,7 +56,9 @@ public class SFPrinterV2 {
 		if (isDebug) {
 			if ("210".equals(yundanType)) {
 				templatePath = "D:/dyingjia/运单/yundan_顺丰/2020年4月30日/sf_210_v2.docx";
-			} else {
+			} else if ("180".equals(yundanType)) {
+				templatePath = "D:/dyingjia/运单/yundan_顺丰/2020年4月30日/sf_180_v2.docx";
+			} else if ("150".equals(yundanType)) {
 				templatePath = "D:/dyingjia/运单/yundan_顺丰/2020年4月30日/sf_150_v2.docx";
 			}
 			printer = "BTP-L540H";
@@ -136,6 +141,31 @@ public class SFPrinterV2 {
 				printSingle(filePath, minfo, index, mainCode, mainCode);
 			}
 		}
+
+		if (minfo.returnInfo != null) {
+			String nowCode = minfo.returnInfo.returnOrder;
+			String name = UploadUtils.getCurrentDay() + "-" + minfo.pid + "_" + nowCode + "_"
+					+ Myuuid.createRandom(4) + "_rt" + ".docx";
+			String filePath = savePath + name;
+			FileInputStream testInputStream = null;
+			try {
+				testInputStream = new FileInputStream(templatePath);
+				FileUtils.fileCopy(testInputStream, filePath);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				mLogger.warn("template error", e);
+				throw new IOException("文件不存在");
+			} catch (IOException e) {
+				e.printStackTrace();
+				mLogger.warn("template error io", e);
+				throw new IOException("模板文件读取失败");
+			} finally {
+				if (testInputStream != null) {
+					testInputStream.close();
+				}
+			}
+			printSingle(filePath, minfo.returnInfo, "", nowCode, nowCode);
+		}
 	}
 
 	/*
@@ -162,7 +192,7 @@ public class SFPrinterV2 {
 		return finalCode;
 	}
 
-	private static String phoneEncode(String mPhone) {
+	public static String phoneEncode(String mPhone) {
 		String token = "*";
 		int tokenCount = 4;
 		int start = 3;
@@ -249,6 +279,20 @@ public class SFPrinterV2 {
 			headerTimeType.put("content", imgBytes);
 			bMarksAndValue.put("timeType", headerTimeType);
 		}
+		if ("1".equals(minfo.isSpecial )) {
+			String mImg  = request.getServletContext().getRealPath("/imgs/TeShu.png");
+			int w2 = (int) (1f / rate);
+			int h2 = (int) (1f / rate);
+			headerTimeType=new HashMap<>();
+			byte[] imgBytes = DocxManager.inputStream2ByteArray(new FileInputStream(mImg), true);
+			headerTimeType.put("width", w2);
+			headerTimeType.put("height", h2);
+			headerTimeType.put("type", "png");
+			headerTimeType.put("content", imgBytes);
+			bMarksAndValue.put("special", headerTimeType);
+		}else{
+			bMarksAndValue.put("special", "");
+		}
 		/*
 		 * minfo.yundans = new String[] { "SF1231112221234", "SF2223334441234" }; minfo.pid =
 		 * "1231233"; minfo.destRouteLable = "d_CODE-1234"; minfo.print_time =
@@ -305,12 +349,29 @@ public class SFPrinterV2 {
 		header2.put("type", type);
 		header2.put("content", imgBytes2);
 		bMarksAndValue.put("qr_code", header2);
-
+		if (minfo.returnOrder != null && !"".equals(minfo.returnOrder)) {
+			header2 = new HashMap<String, Object>();
+			String podPath = request.getServletContext().getRealPath("/imgs/sf/POD.jpg");
+			byte[] imgPodData = DocxManager.inputStream2ByteArray(new FileInputStream(podPath),
+					true);
+			type = podPath.substring(podPath.lastIndexOf(".") + 1, podPath.length());
+			int podHeight = (int) (0.87f / rate);
+			int podWidth = (int) (1.56f / rate);
+			header2.put("width", podWidth);
+			header2.put("height", podHeight);
+			header2.put("type", type);
+			header2.put("content", imgPodData);
+			bMarksAndValue.put("{POD}", header2);
+		} else {
+			bMarksAndValue.put("{POD}", "");
+		}
 		if ("210".equals(yundanType)) {
 			header2 = new HashMap<String, Object>();
 			childImgPath = imgPath + imageFileName + "_2.png";
-			SFPrinterUtil.makeCode128B(child, 10, childImgPath);
+			SFPrinterUtil.makeCode128B(child, 5, childImgPath);
 			imgBytes = DocxManager.inputStream2ByteArray(new FileInputStream(childImgPath), true);
+			type = childImgPath.substring(childImgPath.lastIndexOf(".") + 1,
+					childImgPath.length());
 			imgIn = new FileInputStream(new File(childImgPath));
 			read = ImageIO.read(imgIn);
 			imgW = read.getWidth();
@@ -327,7 +388,7 @@ public class SFPrinterV2 {
 			header2.put("height", h2);
 			header2.put("type", type);
 			header2.put("content", imgBytes);
-			bMarksAndValue.put("barcode2", header2);
+			bMarksAndValue.put("c_bar", header2);
 		}
 		DocxManager.replaceTemplate(bMarksAndValue, wordPath);
 		mLogger.info(String.format("officeHome=%s{},wordPath=%s", officeHome, wordPath));
@@ -335,9 +396,16 @@ public class SFPrinterV2 {
 		try {
 			manager.print();
 		} catch (OfficeException e) {
-			throw new IOException(e.getMessage());
+			e.printStackTrace();
+			String errMsg = e.getMessage();
+			if (e.getCause() != null) {
+				errMsg = e.getCause().getMessage();
+			}
+			throw new IOException("打印异常," + errMsg);
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new IOException("其他异常," + e.getMessage());
 		}
+
 	}
 }

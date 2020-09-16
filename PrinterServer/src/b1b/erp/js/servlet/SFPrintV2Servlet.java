@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSONObject;
+
 import b1b.erp.js.bussiness.SFPrinterUtil;
 import b1b.erp.js.bussiness.SFPrinterV2;
 import b1b.erp.js.entity.YundanInfo;
@@ -90,6 +92,9 @@ public class SFPrintV2Servlet extends HttpServlet {
 			String HK_out = request.getParameter("HK_out");
 			String proCode = request.getParameter("proCode");
 			String qr_code = request.getParameter("qr_code");
+			String returnOrder = request.getParameter("returnOrder");
+			String isSpecial = request.getParameter("isSpecial");
+			String returnOrderData = request.getParameter("returnOrderData");
 
 			String[] infos;
 			StringBuilder builder = new StringBuilder();
@@ -127,6 +132,7 @@ public class SFPrintV2Servlet extends HttpServlet {
 			realInfo.HK_in = "";
 			realInfo.HK_out = "";
 			realInfo.tuoji = tuoji;
+			realInfo.isSpecial = isSpecial;
 
 			if (HK_in != null) {
 				realInfo.HK_in = HK_in;
@@ -154,6 +160,41 @@ public class SFPrintV2Servlet extends HttpServlet {
 			// 其他
 			realInfo.print_time = nowTimeStr;
 			realInfo.note = "";
+			realInfo.returnOrder = returnOrder;
+			if (returnOrderData != null) {
+				try {
+					//System.out.println("returnOrder json="+returnOrderData);
+					YundanInfo rInfo = (YundanInfo) realInfo.clone();
+					JSONObject mObject = JSONObject.parseObject(returnOrderData);
+					rInfo.d_addr = realInfo.j_addr;
+					rInfo.d_name = realInfo.j_name;
+					rInfo.d_phone = realInfo.j_phone;
+					rInfo.d_comp = realInfo.j_comp;
+
+					rInfo.j_addr = realInfo.d_addr;
+					rInfo.j_name = realInfo.d_name;
+					rInfo.j_phone = realInfo.d_phone;
+					rInfo.j_comp = realInfo.d_comp;
+					
+					
+					rInfo.print_time = nowTimeStr;
+					String nowreturnID=mObject.getString("yundanId");
+					rInfo.yundans=new String[] {nowreturnID};
+					rInfo.proCode=mObject.getString("proCode");
+					rInfo.HK_in=mObject.getString("HK_in");
+					rInfo.HK_out=mObject.getString("HK_out");
+					rInfo.qr_code=mObject.getString("qrInfo");
+					rInfo.returnOrder=nowreturnID;
+					rInfo.destRouteLable=mObject.getString("destRouteLable");
+					realInfo.returnInfo=rInfo;
+					realInfo.returnOrder=nowreturnID;
+					if(nowreturnID==null) {
+						System.out.println("returnOrderData="+returnOrderData);
+					}
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			printerV2.Print(realInfo);
 			res = "ok";
 			// printerV2.testApi();

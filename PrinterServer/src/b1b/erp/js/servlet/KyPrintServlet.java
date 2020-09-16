@@ -22,6 +22,7 @@ import com.zjy.print.docx.office.OfficeException;
 import com.zjy.print.docx.util.DocxManager;
 
 import b1b.erp.js.Code128CCreator;
+import b1b.erp.js.bussiness.SFPrinterV2;
 import b1b.erp.js.utils.FileUtils;
 import b1b.erp.js.utils.Myuuid;
 import b1b.erp.js.utils.UploadUtils;
@@ -70,6 +71,7 @@ public class KyPrintServlet extends HttpServlet {
 		String dCompany = request.getParameter("d_company");
 		String pid = request.getParameter("pid");
 		String sign = request.getParameter("signreturn");
+		String isSpecial = request.getParameter("isSpecial");
 		if (jCompany == null) {
 			jCompany = "";
 		}
@@ -123,6 +125,8 @@ public class KyPrintServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 		try {
+			jPhone=SFPrinterV2.phoneEncode(jPhone);
+			dPhone=SFPrinterV2.phoneEncode(dPhone);
 			Map<String, Object> param = new HashMap<String, Object>();
 			Map<String, Object> header = new HashMap<String, Object>();
 			float rate = 0.0264f;
@@ -169,6 +173,20 @@ public class KyPrintServlet extends HttpServlet {
 			param.put("tag_counts", counts);
 			param.put("tag_pt", payType);
 			param.put("tag_account", cardID);
+			if ("1".equals(isSpecial )) {
+				String mImg  = request.getServletContext().getRealPath("/imgs/TeShu.png");
+				int sw1 = (int) (0.65f / rate);
+				int sh1 = (int) (0.65f / rate);
+				HashMap<String,Object> headerTimeType=new HashMap<>();
+				byte[] specialImgdata = DocxManager.inputStream2ByteArray(new FileInputStream(mImg), true);
+				headerTimeType.put("width", sw1);
+				headerTimeType.put("height", sh1);
+				headerTimeType.put("type", "png");
+				headerTimeType.put("content", specialImgdata);
+				param.put("special", headerTimeType);
+			}else{
+				param.put("special", "");
+			}
 			if ("1".equals(sign)) {
 				param.put("tag_sign", "签回单");
 			} else {
@@ -186,8 +204,14 @@ public class KyPrintServlet extends HttpServlet {
 				response.getWriter().append("ok").close();
 				return;
 			} catch (OfficeException e) {
-				errMsg = "office异常," + e.getMessage();
-				throw new IOException(errMsg);
+				e.printStackTrace();
+//				errMsg = "office异常," + e.getMessage();
+//				throw new IOException(errMsg);
+				 errMsg = e.getMessage();
+				if (e.getCause() != null) {
+					errMsg = e.getCause().getMessage();
+				}
+				//throw new IOException("打印异常," + errMsg);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

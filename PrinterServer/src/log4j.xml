@@ -124,14 +124,6 @@
 	<!-- <logger name="com.b1b.js.dd" additivity="false"> <level value="INFO" 
 		/> <appender-ref ref="Check_User_FIle_Appender" /> <appender-ref ref="Check_User_console_Appender" 
 		/> </logger> -->
-	<logger name="com.b1b.js.dd.checkin" additivity="true">
-		<level value="INFO" />
-		<appender-ref ref="checkin_FIle_Appender" />
-	</logger>
-	<logger name="com.b1b.js.bussiness" additivity="true">
-		<level value="INFO" />
-		<appender-ref ref="bussiness_FIle_Appender" />
-	</logger>
 	<logger name="com" additivity="false">
 		<level value="INFO" />
 		<appender-ref ref="normarl_console_Appender" />
