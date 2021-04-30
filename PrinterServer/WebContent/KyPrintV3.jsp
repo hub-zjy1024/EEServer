@@ -11,7 +11,7 @@
 <html> -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>顺丰打印v3</title>
+<title>跨越打印v3</title>
 <script type="text/javascript">
 if (window.console){
 	// console.info("has console");
@@ -29,23 +29,21 @@ if (window.console){
 
 <!-- <script type="text/javascript"
 	src="http://127.0.0.1:8000/CLodopfuncs.js?priority=1"></script>
- -->	
+ -->
 
-	<script type="text/javascript"
-	src="./lodop/jquery-3.3.1.min.js"></script>
-	<script type="text/javascript"
-	src="./lodop/html2canvas.min.js"></script>
-	
-	<script type="text/javascript"
-	src="./lodop/JsBarcode.all.min.js"></script>
-	<script type="text/javascript"
-	src="./lodop/qrcode.min.js"></script>
+<script type="text/javascript" src="./lodop/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="./lodop/html2canvas.min.js"></script>
+
+<script type="text/javascript" src="./lodop/JsBarcode.all.min.js"></script>
+<script type="text/javascript" src="./lodop/qrcode.min.js"></script>
 <!-- <script src="https://cdn.bootcss.com/html2canvas/0.5.0-beta4/html2canvas.js"></script>
- --><script src="https://cdn.bootcss.com/jspdf/1.3.4/jspdf.debug.js"></script>
+ -->
+<script src="https://cdn.bootcss.com/jspdf/1.3.4/jspdf.debug.js"></script>
 
 <!-- <script type="text/javascript"
 	src="http://192.168.10.66:18000/CLodopfuncs.js?priority=2"></script>
- --><!-- <script type="text/javascript"
+ -->
+<!-- <script type="text/javascript"
 	src="http://localhost:18000/CLodopfuncs.js"></script>
  -->
 <!-- <script type="text/javascript" src="./js/date2str.js"></script>
@@ -87,25 +85,23 @@ window.cLodopLoadEvent=function(evt){
 });  */
 </script>
 <%
-	String url="";
-	String sPrinter="";
-	String kfName=request.getParameter("kfName");
-	LodopLoadder.PrintInfo pInfo=LodopLoadder.readLodopUrlBy(kfName);
-	url=pInfo.url;
-	sPrinter=pInfo.printerName;
-	if(!"".equals(url)&&url!=null){
-		%>
-		<script type="text/javascript"
-				src="<%=url %>"></script><% 
+	String url = "";
+	String sPrinter = "";
+	String kfName = request.getParameter("kfName");
+	LodopLoadder.PrintInfo pInfo = LodopLoadder.readLodopUrlBy(kfName);
+	url = pInfo.url;
+	sPrinter = pInfo.printerName;
+	if (!"".equals(url) && url != null) {
+%>
+<script type="text/javascript" src="<%=url%>"></script>
+<%
 	}
-	%>
-<script type="text/javascript"
-	src="./lodop/LodopFuncs.js?priority=1"></script>
+%>
+<script type="text/javascript" src="./lodop/LodopFuncs.js?priority=1"></script>
 <style type="text/css">
 #print_bar {
 	
 }
-
 
 #print_bar button {
 	font-size: 16px;
@@ -114,9 +110,10 @@ window.cLodopLoadEvent=function(evt){
 /* table td{
 border: solid 1px black;
 } */
-#myExportArea{
-overflow: hidden;
+#myExportArea {
+	overflow: hidden;
 }
+
 #print_bar button:nth-of-type(n+2) {
 	margin-left: 12px;
 	margin-top: 16px;
@@ -360,10 +357,9 @@ dir="./imgs/sf/";
 		var jdata={};
 		 try {
 			 <%String poString = request.getParameter("data");
-		/* 	 String path=request.getServletContext().getContextPath();
-			 System.out.println("sfv3 path="+path); */
-			 System.out.println("sfv3 data="+poString);
-			 %>
+			/* 	 String path=request.getServletContext().getContextPath();
+				 System.out.println("sfv3 path="+path); */
+			System.out.println("sfv3 data=" + poString);%>
 			 //初始化数据
 			dataobj = {
 					YDCodes:["1231231231234","1112223331234"],	 //多单号
@@ -389,17 +385,15 @@ dir="./imgs/sf/";
 					twoDimensionCode:"MMM={'k1':'010WB','k2':'010MC','k3':'060','k4':'T6','k5':'322108530494','k6':'','k7':'ae7cc797'}"
 					//二维码信息,接口返回twoDimensionCode字段
 					};
-			 <%
-				String data2="{}";
-			 if(poString!=null){
-				 
-				 try{
-					 OrderMgr orderMgr=new OrderMgr();
-					 YundanInput mData= orderMgr.getData(poString);
-					String jsonStr=JSONObject.toJSONString(mData);
-					JSONObject tempObj=new JSONObject();
-					 data2=String.format("%s",jsonStr);
-					%> <%-- var jdata=JSON.Parse('<%=jsonStr%>'); --%>
+			 <%String data2 = "{}";
+			if (poString != null) {
+
+				try {
+					OrderMgr orderMgr = new OrderMgr();
+					YundanInput mData = orderMgr.getData(poString);
+					String jsonStr = JSONObject.toJSONString(mData);
+					JSONObject tempObj = new JSONObject();
+					data2 = String.format("%s", jsonStr);%> <%-- var jdata=JSON.Parse('<%=jsonStr%>'); --%>
 					 jdata=<%=data2%>;
 					var yundanids=jdata.response.yundanId.split(",");
 					dataobj = {
@@ -442,12 +436,10 @@ dir="./imgs/sf/";
 							twoDimensionCode:jdata.response.qrInfo
 							//二维码信息,接口返回twoDimensionCode字段
 							};
-					<%
-				 }catch(Exception e){
-					 throw new IOException("打印异常"+e.getMessage());
-				 } 
-			 }
-			 %>
+					<%} catch (Exception e) {
+					throw new IOException("打印异常" + e.getMessage());
+				}
+			}%>
 			 if (printMode == 3) {
 				dataobj.YDCodes=["1231231231235"];
 			} 
@@ -468,13 +460,10 @@ dir="./imgs/sf/";
 			   console.log("no SET_LICENSES");
 		}
 			 LODOP.PRINT_INITA(0,0,450,850,"Lodop_SF_V3"+mainId);
-	<%
-	if(!"".equals(sPrinter)&&null!=sPrinter){
-		%>
+	<%if (!"".equals(sPrinter) && null != sPrinter) {%>
 		LODOP.SET_PRINTER_INDEX("<%=sPrinter%>");
-		<%
-	}
-	%>	
+		<%}%>	
+	
 			//LODOP.SET_PRINTER_INDEX("Microsoft XPS Document Writer");
 			if(printer!=undefined&&printer!=''){
 				LODOP.SET_PRINTER_INDEX(printer);
@@ -1072,7 +1061,7 @@ var bodyPattern=/<body>(.|\b|\s)*<\/body>/gi;
 	}
 	abFlagImgUrl=dir+imgName;
 	 if(''==imgName){
-		 abFlagImgUrl=dir+"blank.bmp";
+		 abFlagImgUrl='';
 	 }
 	 /* if("T1"==dataobj.proCode ){
 		proCodeImgUrl=dir+"20_20 T1.png"
@@ -1085,7 +1074,7 @@ var bodyPattern=/<body>(.|\b|\s)*<\/body>/gi;
 	}else if("T9"==dataobj.proCode ){
 		proCodeImgUrl=dir+"资源 26.png"
 	} */
-	 var proImgName="blank.bmp";
+	 var proImgName='';
 		if("T1"==dataobj.proCode ){
 			proImgName="20_20 T1.png"
 		}else if("T4"==dataobj.proCode ){
@@ -1489,17 +1478,17 @@ LODOP.SET_PRINTER_INDEX("\\HAOLEI-PC\Microsoft XPS Document Writer");
 		<div id="print_bar">
 			<button onclick="preview()">预览</button>
 			<button onclick="print()">打印</button>
-		<!-- 	<button onclick="design()">设计</button>
+			<!-- 	<button onclick="design()">设计</button>
 			<button onclick="print(3)">单页</button> -->
 			<div style="display: none;">
-				<button onclick="exportPDF()">导出pdf</button> 
-					<button onclick="printHtml()">打印html</button> 
+				<button onclick="exportPDF()">导出pdf</button>
+				<button onclick="printHtml()">打印html</button>
 			</div>
 		</div>
-		<div id="myExportArea"  style="margin-top:20px;width: 378px;">
-		
-		<!--列表li 模板-->
-<script type="text/html" id="row">
+		<div id="myExportArea" style="margin-top: 20px; width: 378px;">
+
+			<!--列表li 模板-->
+			<script type="text/html" id="row">
  <%-- {
 			note:jdata.tuoji,  
 			payType:jdata.payType,
@@ -1662,213 +1651,11 @@ width: 23px;
 			</div>
 		</div>
 </script>
-	</div>
-	<div id="lineArea"></div>
-  <script type="text/javascript">
-	 jdata=<%=data2%>;
-		var yundanIds=jdata.response.yundanId.split(",");
-		var count=yundanIds.length;
-		var mainId=yundanIds[0];
-		var isReturn=jdata.mSender.need_return_tracking_no;
-		var isPdf=true;
-		
-		if(isPdf){
-			console.log("use pdf");
-			for(var j=0;j<yundanIds.length;j++){
-				var mCode=yundanIds[j];
-				var code=mCode;
-					var crtTime = new Date();
-					var time = dateFtt("yyyy-MM-dd hh:mm:ss", crtTime);
-					//$("#item_time").html(time);
-				// $("#myExportArea").append(`${time}123123123asdfasdf`);
-				 addNewHtml(jdata,j ,count,mCode,mainId);
-				 /* makeBarcode("head_bar"+j,30,code);
-				 makeBarcode("head2_bar"+j,20,code); */
-				 
-				 makeBarcode2("head_bar"+j,{height:30,margin:5},code);
-				 makeBarcode2("head2_bar"+j,{height:20,margin:0},code);
-				 var qrdata=jdata.response.qrInfo;
-				 makeQr(qrdata,"tag_qr_div"+j,{"width":87,"height":87});
-			}
-			var isReturn=jdata.mSender.need_return_tracking_no;
-			if("1"==isReturn){
-				var tCode=jdata.response.returnResponse.yundanId;
-				addNewHtml(jdata,count,count,tCode,mainId);
-				 makeBarcode("head_bar"+count,30,code);
-				 makeBarcode("head2_bar"+count,20,code);
-				 var qrdata=jdata.response.returnResponse.qrInfo;
-				 makeQr(qrdata,"tag_qr_div"+count,{"width":87,"height":87});
-			}
-		}
-		
-	//preview();
-function addNewHtml(jdata,i,count,tempCode,mainId){
-	var isReturn=jdata.mSender.need_return_tracking_no;
-	var dataobj = {
-			note:jdata.tuoji,  
-			payType:jdata.payType,
-			//付款方式
-			//寄件 
-	        j_addr:jdata.mSender.j_address,
-			j_name:jdata.mSender.j_name,
-		 	j_phone:jdata.mSender.j_tel,
-		<%-- 		'<%=mData.mSender.j_tel%>', --%>
-			j_comp:jdata.mSender.j_company,
-			<%-- 	'<%=mData.mSender.j_company%>',//寄件公司 --%>
-			//收件
-			r_addr:jdata.mSender.d_address,
-			<%-- 	'<%=mData.mSender.d_address%>', --%>
-			r_name:jdata.mSender.d_name,
-		<%-- 		'<%=mData.mSender.d_name%>',
-		 --%>	r_phone:jdata.mSender.d_tel,
-		<%-- 		'<%=mData.mSender.d_tel%>',
-		 --%>	r_comp:jdata.mSender.d_company,
-		<%-- 		'<%=mData.mSender.d_company%>',//收件公司
-		 --%>	codingMappingOut:jdata.response.HK_out,
-			<%-- 	'<%=mData.response.HK_out%>',//出港信息码
-			 --%>codingMapping:jdata.response.HK_in,
-		<%-- 		'<%=mData.response.HK_in%>',//进港信息码
-		 --%>	destRouteLabel:jdata.response.destRouteLable,
-			<%-- 	'<%=mData.response.destRouteLable%>',//目的地代号
-		 --%>	proCode:jdata.response.proCode,
-		<%-- 		'<%=mData.response.proCode%>',//时效类型
-		 --%>	destTeamCode:jdata.response.destcode,
-	<%-- 			'<%=mData.response.destcode%>',//取destTeamCode值，收件地址水印
-	 --%>		abFlag:jdata.response.destcode,
-		<%-- 		'<%=mData.response.destcode%>',//根据abFlag值  --%>
-			isSpecial:jdata.isSpecial,
-			paperType:jdata.yundanType,
-			twoDimensionCode:jdata.response.qrInfo
-			//二维码信息,接口返回twoDimensionCode字段
-			};
-	
-	if(i==count){
-		dataobj.j_addr=jdata.mSender.d_address;
-		dataobj.j_name=jdata.mSender.d_name  ,
-		dataobj.j_tel=jdata.mSender.d_tel ,
-		dataobj.jComapany=jdata.mSender.d_company;
-		
-		dataobj.r_addr=jdata.mSender.j_address
-		dataobj.r_name=jdata.mSender.j_name 
-		dataobj.r_phone=jdata.mSender.j_tel 
-		dataobj.r_comp=jdata.mSender.j_company;
-		dataobj.twoDimensionCode=jdata.response.returnResponse.qrInfo;
-		dataobj.destTeamCode=jdata.response.returnResponse.destcode;
-		dataobj.codingMappingOut=jdata.response.returnResponse.HK_out;
-		dataobj.codingMapping=jdata.response.returnResponse.HK_in;
-		dataobj.destRouteLabel=jdata.response.returnResponse.destRouteLable;
-		dataobj.proCode=jdata.response.returnResponse.proCode;
-	}
-	var isReturn=jdata.mSender.need_return_tracking_no;
-	
-	var codingMappingOut=dataobj.codingMappingOut;
-	var codingMapping=dataobj.codingMapping;
-	var destRouteLabel=dataobj.destRouteLabel;
-	var proCodeImgUrl="";
-
-	var abFlagImgUrl='';
-	
-	var imgName="";
-	if("A"==dataobj.abFlag ){
-		imgName="A标.jpg";
-	}else if("B"==dataobj.abFlag ){
-		imgName="B标.jpg"
-	}else{
-		imgName='';
-	}
-	abFlagImgUrl=dir+imgName;
-	 if(''==imgName){
-		 abFlagImgUrl='';
-	 }
-	 var proImgName='';
-	if("T1"==dataobj.proCode ){
-		proImgName="20_20 T1.png"
-	}else if("T4"==dataobj.proCode ){
-		proImgName="20_20 T4.png"
-	}else if("T6"==dataobj.proCode ){
-		proImgName="20_20 T6.png"
-	}else if("T8"==dataobj.proCode ){
-		proImgName="20_20 T8.png"
-	}else if("T9"==dataobj.proCode ){
-		proImgName="资源 26.png"
-	}
-	proCodeImgUrl=dir+proImgName;
-	if(proImgName=''){
-		proCodeImgUrl='';
-	}
-	//var YDCode = dataobj.YDCode;
-		var destAreaCode = dataobj.destAreaCode;
-		var note = '';
-		try {
-			if (dataobj.note) {
-				note = dataobj.note;
-			}
-		} catch (e) {
-			console.log("not exists 'note' key," + e);
-		}
-		var payType = dataobj.payType;
-		var lx = dataobj.serverType;
-		var AccountNo = dataobj.account;
-		var ifsign = dataobj.ifsignreturn;
-		var from = dataobj.j_name + " " +phoneEncode(dataobj.j_phone)   + "  "
-				+ dataobj.j_comp + " " + dataobj.j_addr;
-	
-		if(dataobj.j_addr.length>40){
-			 from = dataobj.j_name + " " +phoneEncode(dataobj.j_phone)   + "  "
-				+ dataobj.j_comp + " " + dataobj.j_addr;
-		}
-		//from+="";
-		var zhChars= from.replace(/[\u4e00-\u9fa5]/g,'').length
-		var totalChars=from.length;
-		var mlen=(totalChars-zhChars)+zhChars*2;
-		console.log("no logs="+mlen);
-		var index=from.indexOf("市");
-		if(mlen>100){
-			
-		}
-		var to = dataobj.r_name + " " + phoneEncode(dataobj.r_phone) + "  "
-				+ dataobj.r_comp + "  " + dataobj.r_addr;
-		if(dataobj.r_addr.length>40){
-			 to = dataobj.r_name + " " + phoneEncode(dataobj.r_phone) + "  "
-				+ dataobj.r_comp +" " + dataobj.r_addr;
-		}
-		var crtTime = new Date();
-		var time = dateFtt("yyyy-MM-dd hh:mm:ss", crtTime);
-		var finalCode=getFormatYunStr(mainId);
-		var finalCode2=getFormatYunStr(mCode);
-		var decodeCode=mCode;
-		if(mCode.indexOf("SF")!=0){
-			decodeCode="SF"+mCode;
-		}
-		dataobj.proCodeImgUrl=proCodeImgUrl; 
-		dataobj.abFlagImgUrl=abFlagImgUrl; 
-		dataobj.tempCode=finalCode2; 
-		dataobj.mainId=finalCode; 
-		dataobj.from=from; 
-		dataobj.to=to; 
-		dataobj.podUrl=""; 
-		dataobj.index=(i+1)+ "/"+count; 
-		dataobj.tag=i; 
-		if("1"==isReturn){
-			dataobj.podUrl=dir+"POD.jpg";
-			
-		}
-		if(i==count){
-			dataobj.index="回单"; 
-		}
-		var crtTime = new Date();
-		var time = dateFtt("yyyy-MM-dd hh:mm:ss", crtTime);
-		dataobj.time=time; 
-		var html='';
-	      var reg = new RegExp("\{\{(.+?)\}\}","igm");        //匹配 {{}} 的内容
-	      var tempLi = $("#row").html();
-	      html+= tempLi.replace(reg, function (node, key) {
-	               return dataobj[key];
-	      });
-	      $("#myExportArea").append(html);
-}
+		</div>
+		<div id="lineArea"></div>
+		<script type="text/javascript">
 	</script>
-	</body>
-	
-	
+</body>
+
+
 </html>

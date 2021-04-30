@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.List;
 
 public class OrderBody implements Serializable {
-    public String payType;
-    public String goodInfos;
-    public String weight;
+	public String payType;
+	public String goodInfos;
+	public String weight;
 	public String pid;
 	public String uid;
 	public String uname;
@@ -18,4 +18,5 @@ public class OrderBody implements Serializable {
 	public int flag;
 	public List<Cargo> cargos;
 	public SFSender reqParams;
+	public ExtraParams extraParam;
 }

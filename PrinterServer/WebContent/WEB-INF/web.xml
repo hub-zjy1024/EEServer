@@ -11,7 +11,6 @@
   <context-param>
     <param-name>printer1</param-name>
     <param-value>BTP-L540H</param-value>
-<!--     <param-value>SF_Printer</param-value> -->
   </context-param>
   <context-param>
     <param-name>dyjDir</param-name>

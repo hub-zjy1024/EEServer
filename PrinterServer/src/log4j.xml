@@ -118,13 +118,23 @@
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern" value="%d{YYYY-MM-dd HH:mm:ss,SSS} [%p] [%t] %c.%M %m%n" />
 		</layout>
-		
+
 	</appender>
 
 	<!-- <logger name="com.b1b.js.dd" additivity="false"> <level value="INFO" 
 		/> <appender-ref ref="Check_User_FIle_Appender" /> <appender-ref ref="Check_User_console_Appender" 
 		/> </logger> -->
 	<logger name="com" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="normarl_console_Appender" />
+		<appender-ref ref="RollingFile_FileSize_Appender_printserver_normal" />
+	</logger>
+	<logger name="b1b.erp.js" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="normarl_console_Appender" />
+		<appender-ref ref="RollingFile_FileSize_Appender_printserver_normal" />
+	</logger>
+	<logger name="pri.zjy.db" additivity="false">
 		<level value="INFO" />
 		<appender-ref ref="normarl_console_Appender" />
 		<appender-ref ref="RollingFile_FileSize_Appender_printserver_normal" />

@@ -166,8 +166,15 @@ public class SFWsUtils {
 
     public static OrderResponse getOrderResponseV2(SFSender info, List<Cargo>cargos,
                                                  List<ExtraService> services) throws Exception {
+    /*
+     * 添加保价
+     * ExtraService
+     * <AddedService
+    	name='INSURE'
+    	value='2304.23'>
+    	</AddedService>*/
         String orderXml = SFWsUtils.createOrderXml(SFWsUtils.ORDER_SERVICE,
-                info, cargos, null);
+                info, cargos, services);
         OrderResponse orderResponse = getOrderResponseV2(orderXml);
         return orderResponse;
     }
@@ -185,9 +192,10 @@ public class SFWsUtils {
         } catch (Exception e) {
             e.printStackTrace();
             throw new Exception("下单失败ex," + e.getMessage());
-        }
+        } 
         XmlDomUtils xmlUtils = new XmlDomUtils();
         OrderResponse resp = xmlUtils.readXML2Obj(result);
+    	//mLogger.info("sf ret xml ={}",result);
         resp.inputXml = xml;
         resp.retXml = result;
         return resp;

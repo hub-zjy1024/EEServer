@@ -66,7 +66,7 @@ public class ZxingBarCreator {
 				}
 			}
 			int lines = blankLine / 2;
-			System.out.println("all lines="+lines+",realWidth="+realWidth+",inputWidth="+pxSize);
+			System.out.println("ZxingBarCreator all lines="+lines+",realWidth="+realWidth+",inputWidth="+pxSize);
 			int offset=lines;
 			if (lines > margin) {
 				lines = lines - margin;

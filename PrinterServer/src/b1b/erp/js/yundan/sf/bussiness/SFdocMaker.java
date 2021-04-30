@@ -1,32 +1,31 @@
-package b1b.erp.js.bussiness;
+package b1b.erp.js.yundan.sf.bussiness;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.xmlbeans.impl.xb.xsdschema.All.MinOccurs;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.zjy.print.bussiness.DocxPrinter;
-import com.zjy.print.docx.office.OfficeException;
 import com.zjy.print.docx.util.DocxManager;
 
-import b1b.erp.js.Code128CCreator;
+import b1b.erp.js.bussiness.SFPrinterUtil;
+import b1b.erp.js.bussiness.SFPrinterV2;
 import b1b.erp.js.entity.YundanInfo;
 import b1b.erp.js.utils.FileUtils;
 import b1b.erp.js.utils.Myuuid;
-import b1b.erp.js.utils.TestBarcode4j;
 import b1b.erp.js.utils.UploadUtils;
 
-public class SFPrinterV2 {
+public class SFdocMaker {
+
 	HttpServletRequest request;
 	private String officeHome;
 	private String templatePath;
@@ -39,10 +38,12 @@ public class SFPrinterV2 {
 	static org.apache.log4j.Logger mLogger = org.apache.log4j.Logger.getLogger(SFPrinterV2.class);
 	String yundanType;
 
-	public SFPrinterV2(HttpServletRequest request) {
-		super();
+	
+	public SFdocMaker(HttpServletRequest request, String yundanType) {
+		this.yundanType = yundanType;
 		this.request = request;
-		yundanType = request.getParameter("yundanType");
+		//yundanType = request.getParameter("yundanType");
+	
 		if ("210".equals(yundanType)) {
 			templatePath = request.getServletContext().getRealPath("/docTemplate/sf_210_v2.docx");
 		} else if ("180".equals(yundanType)) {
@@ -50,6 +51,7 @@ public class SFPrinterV2 {
 		} else if ("150".equals(yundanType)) {
 			templatePath = request.getServletContext().getRealPath("/docTemplate/sf_150_v2.docx");
 		}
+		System.out.println("init="+templatePath+"\t"+yundanType);
 		wordDir = request.getServletContext().getInitParameter("dyjDir");
 		rootPath = wordDir;
 		officeHome = request.getServletContext().getInitParameter("openoffice_home");
@@ -99,10 +101,11 @@ public class SFPrinterV2 {
 		 * public String qr_code; public String pay_type; public String typeA; public String HK_in;
 		 * public String HK_out; public String tuoji; public String note;
 		 */
-		Print(minfo);
+		GetFiles(minfo);
 	}
 
-	public void Print(YundanInfo minfo) throws Exception {
+	public List<String> GetFiles(YundanInfo minfo) throws Exception {
+		ArrayList<String> mdatas = new ArrayList<>();
 		savePath = rootPath + "SF_V2/" + UploadUtils.getCurrentYearAndMonth() + "/";
 		File file = new File(savePath);
 		if (!file.exists()) {
@@ -137,9 +140,11 @@ public class SFPrinterV2 {
 				}
 			}
 			if (i > 0) {
-				printSingle(filePath, minfo, index, mainCode, nowCode);
+				String data = printSingle(filePath, minfo, index, mainCode, nowCode);
+				mdatas.add(data);
 			} else {
-				printSingle(filePath, minfo, index, mainCode, mainCode);
+				String data = printSingle(filePath, minfo, index, mainCode, mainCode);
+				mdatas.add(data);
 			}
 		}
 
@@ -165,8 +170,10 @@ public class SFPrinterV2 {
 					testInputStream.close();
 				}
 			}
-			printSingle(filePath, minfo.returnInfo, "", nowCode, nowCode);
+			String data = printSingle(filePath, minfo.returnInfo, "", nowCode, nowCode);
+			mdatas.add(data);
 		}
+		return mdatas;
 	}
 
 	/*
@@ -211,7 +218,24 @@ public class SFPrinterV2 {
 		return encoded;
 	}
 
-	private void printSingle(String wordPath, YundanInfo minfo, String index, String mainCode,
+	public String readFileBase64(String file) throws IOException {
+		File mfile = new File(file);
+		ByteArrayOutputStream bao = new ByteArrayOutputStream();
+		FileInputStream fis = new FileInputStream(mfile);
+
+		byte[] buffer = new byte[1024 * 1000];
+		int len = 0;
+		while ((len = fis.read(buffer)) != -1) {
+			bao.write(buffer, 0, len);
+		}
+		byte[] mData = bao.toByteArray();
+		bao.close();
+		fis.close();
+		String data = Base64.getEncoder().encodeToString(mData);
+		return data;
+	}
+
+	private String printSingle(String wordPath, YundanInfo minfo, String index, String mainCode,
 			String child) throws Exception {
 		String imgPath = savePath + "codeImg/";
 
@@ -280,18 +304,18 @@ public class SFPrinterV2 {
 			headerTimeType.put("content", imgBytes);
 			bMarksAndValue.put("timeType", headerTimeType);
 		}
-		if ("1".equals(minfo.isSpecial )) {
-			String mImg  = request.getServletContext().getRealPath("/imgs/TeShu.png");
+		if ("1".equals(minfo.isSpecial)) {
+			String mImg = request.getServletContext().getRealPath("/imgs/TeShu.png");
 			int w2 = (int) (1f / rate);
 			int h2 = (int) (1f / rate);
-			headerTimeType=new HashMap<>();
+			headerTimeType = new HashMap<>();
 			byte[] imgBytes = DocxManager.inputStream2ByteArray(new FileInputStream(mImg), true);
 			headerTimeType.put("width", w2);
 			headerTimeType.put("height", h2);
 			headerTimeType.put("type", "png");
 			headerTimeType.put("content", imgBytes);
 			bMarksAndValue.put("special", headerTimeType);
-		}else{
+		} else {
 			bMarksAndValue.put("special", "");
 		}
 		/*
@@ -311,12 +335,8 @@ public class SFPrinterV2 {
 			imageFileName = imageFileName.substring(0, dotIndex);
 		}
 		Map<String, Object> header2 = new HashMap<String, Object>();
-//		float cmW = 6.6f;
-		float cmW = 5.29f;
 		String childImgPath = imgPath + imageFileName + ".png";
-//		SFPrinterUtil.makeCode128B(child, 20, childImgPath);
-		SFPrinterUtil.makeCode128Thin(child, 20, childImgPath);
-//		TestBarcode4j.saveCodeold2(child, childImgPath);
+		SFPrinterUtil.makeCode128B(child, 20, childImgPath);
 		byte[] imgBytes = DocxManager.inputStream2ByteArray(new FileInputStream(childImgPath),
 				true);
 
@@ -326,9 +346,9 @@ public class SFPrinterV2 {
 		int imgH = read.getHeight();
 		imgIn.close();
 
-	
+		float cmW = 5.6f;
 		int w = (int) (cmW / rate);
-		int h = (int) (1.3f / rate);
+		int h = (int) (1.2f / rate);
 		int w2 = w;
 		int h2 = h;
 		// 5.6
@@ -341,16 +361,14 @@ public class SFPrinterV2 {
 		bMarksAndValue.put("barcode", header2);
 
 		header2 = new HashMap<String, Object>();
-		String qrImgPath  = imgPath + imageFileName + "_qr.png";
+		childImgPath = imgPath + imageFileName + "_qr.png";
 		int qrWidth = 80;
 		int qrDocSize = (int) (2.5f / rate);
-//		int realQrWidth = (int) (qrDocSize * (1 + 0.4));
-////		SFPrinterUtil.makeQrFile(minfo.qr_code, realQrWidth, 2, qrImgPath);
-		int realQrWidth = (int) (qrDocSize * (1 + 0.3));
-		realQrWidth=180;
-		SFPrinterUtil.makeQrFile(minfo.qr_code, realQrWidth, 2, qrImgPath);
-		byte[] imgBytes2 = DocxManager.inputStream2ByteArray(new FileInputStream(qrImgPath),
+		int realQrWidth = (int) (qrDocSize * (1 + 0.4));
+		SFPrinterUtil.makeQrFile(minfo.qr_code, realQrWidth, 2, childImgPath);
+		byte[] imgBytes2 = DocxManager.inputStream2ByteArray(new FileInputStream(childImgPath),
 				true);
+		type = childImgPath.substring(childImgPath.lastIndexOf(".") + 1, childImgPath.length());
 		header2.put("width", qrDocSize);
 		header2.put("height", qrDocSize);
 		header2.put("type", type);
@@ -374,22 +392,22 @@ public class SFPrinterV2 {
 		}
 		if ("210".equals(yundanType)) {
 			header2 = new HashMap<String, Object>();
-//			childImgPath = imgPath + imageFileName + "_2.png";
-//			type = childImgPath.substring(childImgPath.lastIndexOf(".") + 1,
-//			childImgPath.length());
-//			SFPrinterUtil.makeCode128B(child, 5, childImgPath);
+			childImgPath = imgPath + imageFileName + "_2.png";
+			SFPrinterUtil.makeCode128B(child, 5, childImgPath);
 			imgBytes = DocxManager.inputStream2ByteArray(new FileInputStream(childImgPath), true);
-
+			type = childImgPath.substring(childImgPath.lastIndexOf(".") + 1, childImgPath.length());
 			imgIn = new FileInputStream(new File(childImgPath));
 			read = ImageIO.read(imgIn);
 			imgW = read.getWidth();
 			imgH = read.getHeight();
 			imgIn.close();
+			cmW = 5.6f;
 			w = (int) (cmW / rate);
 			h = (int) (0.5f / rate);
 			w2 = w;
 			h2 = h;
 			// 5.6
+			type = childImgPath.substring(childImgPath.lastIndexOf(".") + 1, childImgPath.length());
 			header2.put("width", w2);
 			header2.put("height", h2);
 			header2.put("type", type);
@@ -397,21 +415,15 @@ public class SFPrinterV2 {
 			bMarksAndValue.put("c_bar", header2);
 		}
 		DocxManager.replaceTemplate(bMarksAndValue, wordPath);
-//		mLogger.info(String.format("officeHome=%s,wordPath=%s", officeHome, wordPath));
-		DocxPrinter manager = new DocxPrinter(officeHome, printer, wordPath);
-		try {
-			manager.print();
-		} catch (OfficeException e) {
-			e.printStackTrace();
-			String errMsg = e.getMessage();
-			if (e.getCause() != null) {
-				errMsg = e.getCause().getMessage();
-			}
-			throw new IOException("打印异常," + errMsg);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new IOException("其他异常," + e.getMessage());
-		}
+		return readFileBase64(wordPath);
+		// mLogger.info(String.format("officeHome=%s{},wordPath=%s", officeHome, wordPath));
+		/*
+		 * DocxPrinter manager = new DocxPrinter(officeHome, printer, wordPath); try {
+		 * manager.print(); } catch (OfficeException e) { e.printStackTrace(); String errMsg =
+		 * e.getMessage(); if (e.getCause() != null) { errMsg = e.getCause().getMessage(); } throw
+		 * new IOException("打印异常," + errMsg); } catch (Exception e) { e.printStackTrace(); throw new
+		 * IOException("其他异常," + e.getMessage()); }
+		 */
 
 	}
 }

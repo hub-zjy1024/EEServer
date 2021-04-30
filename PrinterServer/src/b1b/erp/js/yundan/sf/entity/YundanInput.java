@@ -16,4 +16,6 @@ public class YundanInput {
 	public String printer;
 	public String yundanType;
 	public int flag;
+	public String exLog;
+
 }

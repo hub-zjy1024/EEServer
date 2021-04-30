@@ -23,7 +23,7 @@ public class SingleOoManager {
 	private File templateProfileDir = null;
 	private File workDir = new File(System.getProperty("java.io.tmpdir"));
 	private long taskQueueTimeout = 20 * 1000L; // 30 seconds
-	private long taskExecutionTimeout = 15 * 1000L; //
+	private long taskExecutionTimeout = 45 * 1000L; //
 	private int maxTasksPerProcess = 50;
 	private long retryTimeout = 15 * 1000;
 	public static SingleOoManager single;

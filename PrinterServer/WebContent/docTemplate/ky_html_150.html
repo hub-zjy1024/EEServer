@@ -1,0 +1,118 @@
+<div class="item" style="height: 571px; width: 374px;overflow:hidden;padding: 0px 2px;">
+	<style type="text/css">		table td{padding:1px 1px;margin:0px 0px} .j_icon{width:23px;padding:0 4px}	</style>
+<div style="height: 32px;padding: 5px;"><img width="85px" style="float: right;" src="{{rexian}}"></div> 
+	<table style="width: 374px;border-collapse:collapse;border: 1px solid;">
+		<tr>
+			<td style="font-size: 12px">zj</td>
+			<td colspan="2" style="font-size: 12px">
+				<div id="item_time">{{time}}</div>
+			</td>
+		</tr>
+		<tr>
+			<td>{{index}}</td>
+			<td style="font-size: 12px">
+				<div style="width: 254px">
+					<img id="head_bar{{tag}}" height="40px" width="200px" src="{{codeImg}}"> </img>
+							<div style="margin-left: 20px;margin-top: 2px;">
+					<span> 母单号&nbsp; </span> {{mainId}}
+					</div>
+					<div style="margin-left: 20px;height: 16px;">
+					<div style="display: {{display}};">	<span> 子单号&nbsp; </span> {{tempCode}}</div>
+					</div>
+				</div>
+			</td>
+			<td rowspan="2"><img width="60px" src="{{proCodeImgUrl}}">
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td></td>
+		</tr>
+	</table>
+	<table style="width: 374px;border-collapse:collapse;margin-top: 2px;border:solid 1px black;">
+		<tr>
+			<td colspan="5" style="padding:0px 0px;">
+				<div style="padding: 1px 5px;width:359px; height: 40px; overflow:hidden; font-size: 37px;">
+					{{destRouteLabel}}</div>
+			</td>
+		</tr>
+		<tr>
+			<!-- <td style="padding:0px 0px; border-bottom:solid 1px black;">
+				<div class="j_icon" style="width: 23px; padding: 0 4px;">
+					<img width="23px" src="{{dImg}}"> </img>
+				</div>
+			</td>
+			<td colspan="4" style="padding:0px 0px; border-bottom:solid 1px black;">
+				<div style="height: 57px;overflow:hidden;font-size: 12px;line-height: 14px;">
+					{{to}}</div>
+			</td> -->
+					
+			 <td colspan="5" style="padding:0px 0px; border-bottom:solid 1px black;">
+				<div class="j_icon" style="margin-left:1px;margin-top:3px; width: 23px; padding: 0 4px;float: left;">
+					<img width="32px" src="{{dImg}}"> </img>
+				</div>
+			 	<div style="word-break: break-word;width: 327px;margin-left:45px;height: 43px;overflow:hidden;font-size: 12px;line-height: 14px;">
+					{{to}}</div>
+					<div style="font-size: 39px; float: left; margin-top: -50px;margin-left: 129px;">{{dstcode}} </div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" style="border-bottom:solid 1px">
+				<div style="width: 100px;height:40px; overflow:hidden;margin: 2px;">{{payType}}</div>
+			</td>
+			<td id="tag_qr" rowspan="3" style="border-left:solid 1px ;text-align: center;">
+				<div>
+				<!-- 	<div id="tag_qr_div{{tag}}" style="width:58px;padding: 4px 14px;">
+					</div> -->
+					<img id="head2_bar{{tag}}" style="    padding: 2px;"  width="120px" src="{{qrImg}}"> 
+				</div>
+			</td>
+			<td rowspan="3" style="border-left:solid 1px">
+				<div style="width: 19px;font-size: 20px;">已验视</div>
+			</td>
+			<td rowspan="1" style="border-bottom:solid 1px;border-left:solid 1px">
+				<div style="width: 77px;">
+					<img height="30px" src="{{abFlagImgUrl}}"> </img>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td rowspan="2" colspan="2" style="border-right:solid 1px ;font-size: 28px;">
+				<div style="width: 100px;  height: 62px; line-height: 30px; overflow: hidden;margin: 2px;">
+					{{codingMapping}}</div>
+			</td>
+			<td rowspan="2" style="border-left:solid 1px;font-size: 20px;">
+				<div style="height: 41px; overflow:hidden;">
+					{{codingMappingOut}}</div>
+			</td>
+		</tr>
+	</table>
+	<table style="width: 374px;border-collapse:collapse;margin-top: 4px; border:solid 1px black;">
+		<tr>
+			<td style="border-bottom:solid 1px;">
+				<div style=" padding: 0 4px;">
+					<img width="32px" src="{{jImg}}"> </img>
+				</div>
+			</td>
+			<td style="border-bottom: solid 1px;" colspan="4">
+				<div style="height: 57px;word-break: break-word;width: 327px; overflow:hidden; font-size: 12px; line-height: 14px;">
+					{{from}}</div>
+			</td>
+		</tr>
+		<tr>
+			<td style="border-bottom: solid 1px;" colspan="5" >
+			<div style="float: right;"><img width="23px" src="{{speIcon}}"></div>
+				<div style=" font-size: 12px; line-height: 14px;height: 66px;margin:2px; overflow:hidden;">
+					托寄物:{{note}}</div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="5">
+				<div style="height: 65px; overflow:hidden;float: left;">
+					<img height=55px src="{{podUrl}}">
+				</div>
+				<div style="margin-left: 113px; margin-top: 5px;"><img  height="40px"  width="200px" src="{{spe150Code}}"></div>
+			</td>
+		</tr>
+	</table>
+</div>

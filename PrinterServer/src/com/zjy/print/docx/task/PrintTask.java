@@ -1,5 +1,8 @@
 package com.zjy.print.docx.task;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XComponentLoader;
 import com.sun.star.lang.XComponent;
@@ -17,6 +20,7 @@ public class PrintTask implements OfficeTask {
 	private boolean hideWindow = false;
 	double len = 0;
 
+	static Logger mLogger=LoggerFactory.getLogger(PrintTask.class);
 	public void setHideWindow(boolean hideWindow) {
 		this.hideWindow = hideWindow;
 	}
@@ -45,21 +49,32 @@ public class PrintTask implements OfficeTask {
 			throw new OfficeException("lastpages must larger than first pages");
 		}
 		String[] args = new String[] { printer, fileName, pages };
-		Object oDesktop = context.getService("com.sun.star.frame.Desktop");
-		XComponentLoader xCompLoader = UnoRuntime.queryInterface(XComponentLoader.class, oDesktop);
+	
 		java.io.File sourceFile = new java.io.File(fileName);
 		com.sun.star.view.XPrintable xPrintable = null;
 		String errMsg = "";
+		com.sun.star.lang.XComponent docComp =null;
 		try {
+			Object oDesktop = context.getService("com.sun.star.frame.Desktop");
+			if(oDesktop==null){
+				throw new Exception("com.sun.star.frame.Desktop==null");
+			}
+			XComponentLoader xCompLoader = UnoRuntime.queryInterface(XComponentLoader.class, oDesktop);
+			if(xCompLoader==null){
+				throw new Exception("xCompLoader==null");
+			}
 			StringBuffer sUrl = new StringBuffer("file:///");
 			sUrl.append(sourceFile.getCanonicalPath().replace('\\', '/'));
 			com.sun.star.beans.PropertyValue[] openValues = new com.sun.star.beans.PropertyValue[1];
 			openValues[0] = new PropertyValue();
 			openValues[0].Name = "Hidden";
 			openValues[0].Value = Boolean.valueOf(hideWindow);
-			com.sun.star.lang.XComponent docComp = xCompLoader.loadComponentFromURL(sUrl.toString(),
+			docComp=xCompLoader.loadComponentFromURL(sUrl.toString(),
 					"_blank", 0, openValues);
 			xPrintable = UnoRuntime.queryInterface(com.sun.star.view.XPrintable.class, docComp);
+			if(xPrintable==null){
+				throw new Exception("xPrintable==null");
+			}
 			com.sun.star.beans.PropertyValue propertyValue[] = new com.sun.star.beans.PropertyValue[1];
 			propertyValue[0] = new com.sun.star.beans.PropertyValue();
 			propertyValue[0].Name = "Name";
@@ -74,10 +89,11 @@ public class PrintTask implements OfficeTask {
 			options[1] = new com.sun.star.beans.PropertyValue();
 			// 同步执行打印，便于控制关闭文档，false为异步
 			options[1].Name = "Wait";
-			options[1].Value = Boolean.valueOf(true);
+//			options[1].Value = Boolean.valueOf(true);
+			options[1].Value = Boolean.valueOf(false);
 
 			xPrintable.print(options);
-			closeInterface(xPrintable);
+			
 		/*} catch (DisposedException e) {
 			throw new OfficeException("loadComponentFromURL exception", e);
 		} catch (java.io.IOException e) {
@@ -92,6 +108,8 @@ public class PrintTask implements OfficeTask {
 			throw new OfficeException("打印过程出错", e);
 		} 
 		finally {
+			//closeInterface(docComp);
+			closeInterface(docComp);
 			len = ((double) (System.currentTimeMillis() - time1)) / 1000;
 		}
 	}
@@ -124,10 +142,11 @@ public class PrintTask implements OfficeTask {
 				}
 			} else if (obj instanceof XComponent) {
 				((XComponent) obj).dispose();
-				System.out.println("not colseable:" + obj.toString());
+				mLogger.warn("not colseable:" + obj.toString());
 			}
 		} else {
-			System.err.println(this + " closeWindow error: XComponent is null");
+			mLogger.warn(this + " closeWindow error: XComponent is null");
+//			System.err.println(this + " closeWindow error: XComponent is null");
 		}
 	}
 

@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import com.mysql.cj.jdbc.exceptions.MysqlDataTruncation;
 
 import b1b.erp.js.yundan.sf.entity.YundanInput;
 import pri.zjy.db.DBPoolConnection;
@@ -72,9 +73,11 @@ public class OrderMgr {
 			}
 		} catch (JSONException e) {
 			throw new SQLException("查询不到运单数据");
+		} catch (MysqlDataTruncation e) {
+			throw new SQLException("字段内容过长, "+e.getMessage());
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new SQLException("连接数据库失败");
+			throw new SQLException("连接数据库失败,"+e.getMessage());
 		} catch (Exception e) {
 			throw e;
 		} finally {

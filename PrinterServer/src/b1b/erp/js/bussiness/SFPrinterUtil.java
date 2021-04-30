@@ -126,6 +126,7 @@ public class SFPrinterUtil {
 			}
 		}
 		String wordDir = request.getServletContext().getInitParameter("dyjDir");
+		
 		rootPath = wordDir;
 		officeHome = request.getServletContext().getInitParameter("openoffice_home");
 		PrintWriter writer = null;
@@ -287,8 +288,8 @@ public class SFPrinterUtil {
 	public static void main(String[] args) {
 		try {
 			String workDir = "D:/dyingjia/运单/yundan_顺丰/";
-			makeCode128B("SF1231112223333", 20,
-					"D:/dyingjia/运单/yundan_顺丰/2020年4月30日/testcode128B.jpg");
+			makeCode128B("SF1231112223333", 49,
+					workDir+"testcode128B.jpg");
 			String savepath = workDir + "zxingQr.png";
 			int size = 300;
 			String qrData = "sdfjjjjj123123";
@@ -304,5 +305,12 @@ public class SFPrinterUtil {
 		String barCode = codeCreator.getCodeA(str, 1);
 		// (str, "");
 		codeCreator.kiCode128C(barCode, 2, height, savePath);
+	}
+	
+	public static void makeCode128Thin(String str, int height, String savePath) throws Exception {
+		Code128CCreator codeCreator = new Code128CCreator();
+		String barCode = codeCreator.getCodeA(str, 1);
+		// (str, "");
+		codeCreator.kiCode128C(barCode, 1, height, savePath);
 	}
 }

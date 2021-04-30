@@ -1,6 +1,7 @@
 package b1b.erp.js.yundan.sf;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -13,15 +14,20 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 
 import b1b.erp.js.bussiness.SFPrinterUtil;
+import b1b.erp.js.entity.GoodInfo;
 import b1b.erp.js.entity.RetJsonObj;
 import b1b.erp.js.utils.StreamRead;
 import b1b.erp.js.utils.UploadUtils;
+import b1b.erp.js.yundan.SFv4Model;
+import b1b.erp.js.yundan.ky.util.KyService;
 import b1b.erp.js.yundan.sf.bussiness.OrderMgr;
 import b1b.erp.js.yundan.sf.entity.Cargo;
 import b1b.erp.js.yundan.sf.entity.OrderBody;
 import b1b.erp.js.yundan.sf.entity.SFSender;
 import b1b.erp.js.yundan.sf.entity.YundanInput;
+import b1b.erp.js.yundan.sf.entity.YundanModel;
 import b1b.erp.js.yundan.sf.sfutils.DyjInterface2;
+import b1b.erp.js.yundan.sf.sfutils.ExtraService;
 import b1b.erp.js.yundan.sf.sfutils.SFWsUtils;
 
 /**
@@ -36,7 +42,6 @@ public class OrderAndPrinteServlet extends HttpServlet {
 	 */
 	public OrderAndPrinteServlet() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -49,15 +54,14 @@ public class OrderAndPrinteServlet extends HttpServlet {
 		String json = "";
 		try {
 			json = StreamRead.readFrom(request.getInputStream());
-			System.out.println("SFYundan2 recJson=" + json);
+			// System.out.println("SFYundan2 recJson=" + json);
 			OrderBody mobj = JSONObject.parseObject(json, OrderBody.class);
 			SFSender mSender = mobj.reqParams;
 			List<Cargo> cargos = mobj.cargos;
 			String yundanType = mobj.yundanType;
-			if(yundanType==null) {
-				yundanType="210";
-				System.out.println("use debug ydType="+yundanType);
-
+			if (yundanType == null) {
+				yundanType = "210";
+				System.out.println("use debug ydType=" + yundanType);
 			}
 			String printer = mobj.printer;
 			int flag = mobj.flag;
@@ -65,23 +69,40 @@ public class OrderAndPrinteServlet extends HttpServlet {
 			String pid = mobj.pid;
 			String uid = mobj.uid;
 			String uname = mobj.uname;
+			
+			List<ExtraService> mList = new ArrayList<>();
+//			if ("fapiao".equals(mobj.goodInfos)) {
+			//暂时关闭
+			if ("fapiao2".equals(mobj.goodInfos)) {
+				//发票类型的，默认保价500
+				ExtraService addBaojia = ExtraService.addBaojia(500);
+				mList.add(addBaojia);
+				if( mobj.note!=null){
+					mobj.note+="_保价";
+				}
+			} else {
+
+			}
 			SFWsUtils.OrderResponse orderResponse = SFWsUtils.getOrderResponseV2(mSender, cargos,
-					null);
-			//日志存储
+					mList);
+		
+//			 System.out.println("inputJson="+json+",\r\nxml="+orderResponse.inputXml);
+
+			// 日志存储
 			DyjInterface2.SetRequestLog(pid, uid, uname, orderResponse.inputXml,
 					orderResponse.retXml, logType);
-			//System.out.println("retXml="+	orderResponse.retXml );
+			// System.out.println("retXml="+ orderResponse.retXml );
 			// 删除请求和相应的xml
 			orderResponse.inputXml = "";
 			orderResponse.retXml = "";
-			if(	orderResponse.returnResponse!=null) {
-				
+			if (orderResponse.returnResponse != null) {
+
 			}
 			String jsondata = JSONObject.toJSONString(orderResponse);
 			String mHostAndPort = request.getRequestURL().substring(0,
 					request.getRequestURL().indexOf("/", 8));
 			String servletPath = request.getServletContext().getContextPath();
-			String url = mHostAndPort + servletPath+"/SFPrintV3.jsp?";
+			String url = mHostAndPort + servletPath + "/SFPrintV4Html.jsp?";
 			/*
 			 * String url = mHostAndPort + "/Dyj_server/SFPrintV3.jsp?data=" +
 			 * URLEncoder.encode(jsondata, "utf-8");
@@ -124,46 +145,63 @@ public class OrderAndPrinteServlet extends HttpServlet {
 			} else {
 				builder.append(String.format("无型号信息,%s_%s_and", nowTimeStr, pid));
 			}
-			if(note!=null){
-				builder=new StringBuilder();
-				/*		builder.append(note);
-			builder.append("_");
-				builder.append(nowTimeStr);
-				builder.append("_");
-				builder.append(pid);*/
-				builder.append(String.format("%s,%s_%s" ,note, nowTimeStr, pid));
+			if (note != null) {
+				builder = new StringBuilder();
+				/*
+				 * builder.append(note); builder.append("_"); builder.append(nowTimeStr);
+				 * builder.append("_"); builder.append(pid);
+				 */
+				builder.append(String.format("%s,%s_%s", note, nowTimeStr, pid));
 				if (flag == 1) {
 					// 手机托寄
 					builder.append("_and");
 				} else {
-					builder.append("_"+flag);
+					builder.append("_" + flag);
 					// 其他托寄
 				}
 			}
 			OrderMgr orderManager = new OrderMgr();
 			// int flag=minput.flag;
 			minput.tuoji = builder.toString();
-			if(weight==null){
-				weight="";
+			if (weight == null) {
+				weight = "";
 			}
-			minput.weight =weight;
+			minput.weight = weight;
 			// minput.tuoji = flag;
 			minput.mSender = mobj.reqParams;
 			minput.response = orderResponse;
 			minput.printer = printer;
 			minput.yundanType = yundanType;
-			minput.flag=mobj.flag;
+			minput.flag = mobj.flag;
 			minput.isSpecial = mobj.isSpecial;
 
 			String randowmID = UploadUtils.getRandomWithTime();
-			orderManager.insertData(randowmID,pid, orderResponse.yundanId,
+			orderManager.insertData(randowmID, pid, orderResponse.yundanId,
 					JSONObject.toJSONString(minput));
 			url += "data=" + randowmID;
+
+			YundanModel mModle = new YundanModel();
+			mModle.yundanId = orderResponse.yundanId;
+			mModle.destcode = orderResponse.destcode;
+			if ("1".equals(mSender.need_return_tracking_no)) {
+				System.out.println("mHuidan=" + JSONObject.toJSONString(mSender));
+				mModle.huidanId = orderResponse.returnResponse.yundanId;
+			} else {
+				mModle.huidanId = "";
+			}
+			mModle.url = url;
+			// retJson.data.add(orderResponse.yundanId);
+			// retJson.data.add(orderResponse.destcode);
+			// retJson.data.add(url);
+			// retJson.data.add(onlyHtmls);
+			SFv4Model model = new SFv4Model(minput, request);
+			List<String> onlyHtmls = model.getOnlyHtmls();
+			mModle.htmls.addAll(onlyHtmls);
+			retJson.data.add(mModle);
 			retJson.errCode = 0;
 			retJson.errMsg = "成功";
-			retJson.data.add(orderResponse.yundanId);
-			retJson.data.add(orderResponse.destcode);
-			retJson.data.add(url);
+			// KyService mKyMgr = new KyService(mobj, request);
+			// retJson = mKyMgr.orderAndGetRetobj();
 		} catch (JSONException e) {
 			e.printStackTrace();
 			System.out.println("orderError,json=" + json);
@@ -188,7 +226,6 @@ public class OrderAndPrinteServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// TODO Auto-generated method stub
 		doGet(request, response);
 	}
 

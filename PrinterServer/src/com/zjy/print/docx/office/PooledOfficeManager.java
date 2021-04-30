@@ -97,6 +97,7 @@ public class PooledOfficeManager implements OfficeManager {
 		});
 		currentTask = futureTask;
 		String errMsg = "";
+		long tTaskExecutionTimeout=settings.getTaskExecutionTimeout();
 		try {
 			futureTask.get(settings.getTaskExecutionTimeout(), TimeUnit.MILLISECONDS);
 			logger.info(String.format("task finished [%s] ", task.toString()));
@@ -109,9 +110,9 @@ public class PooledOfficeManager implements OfficeManager {
 			// managedOfficeProcess.restartDueToTaskTimeout();
 
 			managedOfficeProcess.restartDueToTaskTimeout();
-			errMsg = String.format("task did not complete within %s ms",
-					settings.getTaskExecutionTimeout());
-			throw new OfficeException("执行任务超时");
+			errMsg = String.format("超时时间 %s ms",
+					tTaskExecutionTimeout);
+			throw new OfficeException("执行任务超时,"+errMsg);
 		} catch (ExecutionException executionException) {
 			if (executionException.getCause() instanceof OfficeException) {
 				managedOfficeProcess.getConnection().setDisConnected();

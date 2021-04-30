@@ -67,7 +67,7 @@ public class ProcessPoolOfficeManager implements OfficeManager {
 		try {
 			manager = acquireManager();
 			if (manager == null) {
-				throw new TimeoutException("获取 manager失败");
+				throw new TimeoutException("获取 manager超时,time="+taskQueueTimeout);
 			}
 			running = true;
 			manager.execute(task);
